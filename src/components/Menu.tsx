@@ -1,90 +1,83 @@
+import { role } from "@/lib/data";
+import Image from "next/image";
+import Link from "next/link";
+
 const menuItems = [
   {
-    title: "MENU",
+    title: "MAIN",
     items: [
       {
         icon: "/home.png",
         label: "Home",
         href: "/",
-        visible: ["admin", "teacher", "student", "parent"],
+        visible: ["admin", "doctor", "patient", "labTech"],
       },
       {
-        icon: "/teacher.png",
-        label: "Teachers",
-        href: "/list/teachers",
-        visible: ["admin", "teacher"],
-      },
-      {
-        icon: "/student.png",
-        label: "Students",
-        href: "/list/students",
-        visible: ["admin", "teacher"],
-      },
-      {
-        icon: "/parent.png",
-        label: "Parents",
-        href: "/list/parents",
-        visible: ["admin", "teacher"],
-      },
-      {
-        icon: "/subject.png",
-        label: "Subjects",
-        href: "/list/subjects",
+        icon: "/book.png",
+        label: "Labs",
+        href: "/list/labs",
         visible: ["admin"],
       },
       {
-        icon: "/class.png",
-        label: "Classes",
-        href: "/list/classes",
-        visible: ["admin", "teacher"],
+        icon: "/book.png",
+        label: "Book a test",
+        href: "/labs",
+        visible: ["patient", "admin"],
       },
       {
-        icon: "/lesson.png",
-        label: "Lessons",
-        href: "/list/lessons",
-        visible: ["admin", "teacher"],
+        icon: "/subject.png",
+        label: "My Lab Tests",
+        href: "/my-tests",
+        visible: ["patient", "labTech"],
       },
       {
-        icon: "/exam.png",
-        label: "Exams",
-        href: "/list/exams",
-        visible: ["admin", "teacher", "student", "parent"],
+        icon: "/calendar.png",
+        label: "Appointments",
+        href: "/list/appointments",
+        visible: ["patient", "doctor", "admin", "labTech"],
       },
       {
-        icon: "/assignment.png",
-        label: "Assignments",
-        href: "/list/assignments",
-        visible: ["admin", "teacher", "student", "parent"],
+        icon: "/patient.png",
+        label: "Patients",
+        href: "/list/patients",
+        visible: ["admin"],
+      },
+      {
+        icon: "/doctor.png",
+        label: "Doctors",
+        href: "/list/doctors",
+        visible: ["admin"],
+      },
+
+      {
+        icon: "/messages.png",
+        label: "Messages",
+        href: "/messages",
+        visible: ["patient", "doctor", "admin", "labTech"],
+      },
+      {
+        icon: "/subject.png",
+        label: "Lab Tests",
+        href: "/list/tests",
+        visible: ["admin"],
+      },
+      {
+        icon: "/subject.png",
+        label: "Available Tests",
+        href: "/tests",
+        visible: ["patient", "doctor", "admin", "labTech"],
+      },
+      {
+        icon: "/anat.png",
+        label: "Announcements",
+        href: "/list/announcement",
+        visible: ["admin"],
       },
       {
         icon: "/result.png",
         label: "Results",
         href: "/list/results",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
-      {
-        icon: "/attendance.png",
-        label: "Attendance",
-        href: "/list/attendance",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
-      {
-        icon: "/calendar.png",
-        label: "Events",
-        href: "/list/events",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
-      {
-        icon: "/message.png",
-        label: "Messages",
-        href: "/list/messages",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
-      {
-        icon: "/announcement.png",
-        label: "Announcements",
-        href: "/list/announcements",
-        visible: ["admin", "teacher", "student", "parent"],
+        visible: ["admin", "patient"],
       },
     ],
   },
@@ -95,20 +88,55 @@ const menuItems = [
         icon: "/profile.png",
         label: "Profile",
         href: "/profile",
-        visible: ["admin", "teacher", "student", "parent"],
+        visible: ["admin", "doctor", "patient", "labTech"],
       },
       {
-        icon: "/setting.png",
+        icon: "/settings.png",
         label: "Settings",
         href: "/settings",
-        visible: ["admin", "teacher", "student", "parent"],
+        visible: ["admin", "doctor", "patient", "labTech"],
       },
       {
         icon: "/logout.png",
         label: "Logout",
         href: "/logout",
-        visible: ["admin", "teacher", "student", "parent"],
+        visible: ["admin", "doctor", "patient", "labTech"],
       },
     ],
   },
 ];
+
+const Menu = () => {
+  return (
+    <div className="mt-4 text-sm">
+      {menuItems.map((section) => (
+        <div className="flex flex-col gap-6" key={section.title}>
+          <span className="hidden lg:block text-gray-400 font-light my-4">
+            {section.title}
+          </span>
+          {section.items.map((item) => {
+            if (item.visible.includes(role)) {
+              return (
+                <Link
+                  href={item.href}
+                  key={item.label}
+                  className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-lamaSkyLight"
+                >
+                  <Image
+                    src={item.icon}
+                    alt={item.label}
+                    width={20}
+                    height={20}
+                  />
+                  <span className="hidden lg:block">{item.label}</span>
+                </Link>
+              );
+            }
+          })}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default Menu;
