@@ -1,3 +1,5 @@
+"use client";
+
 import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
@@ -5,6 +7,7 @@ import TableSearch from "@/components/TableSearch";
 import { role, labsData } from "@/lib/data";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type Labs = {
   id: number;
@@ -14,7 +17,7 @@ type Labs = {
   photo: string;
   phone: string;
   testsAvailable: string[]; // List of tests available in the lab
-  address: string;
+  location: string;
 };
 
 const columns = [
@@ -49,6 +52,8 @@ const columns = [
 ];
 
 const LabsListPage = () => {
+  const router = useRouter();
+
   const renderRow = (item: Labs) => (
     <tr
       key={item.id}
@@ -76,7 +81,7 @@ const LabsListPage = () => {
       </td>
       {/* Display list of tests */}
       <td className="hidden md:table-cell">{item.phone}</td>
-      <td className="hidden md:table-cell">{item.address}</td>
+      <td className="hidden md:table-cell">{item.location}</td>
       <td>
         <div className="flex items-center gap-2">
           <Link href={`/list/labs/${item.id}`}>
@@ -85,7 +90,7 @@ const LabsListPage = () => {
             </button>
           </Link>
           {role === "admin" && (
-            <FormModal table="teacher" type="delete" id={item.id} />
+            <FormModal table="lab" type="delete" id={item.id} />
           )}
         </div>
       </td>
@@ -106,7 +111,7 @@ const LabsListPage = () => {
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
-            {role === "admin" && <FormModal table="teacher" type="create" />}
+            {role === "admin" && <FormModal table="lab" type="create" />}
           </div>
         </div>
       </div>

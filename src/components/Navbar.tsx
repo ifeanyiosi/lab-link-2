@@ -1,8 +1,26 @@
 import Image from "next/image";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { useAuth } from "@/context/AuthContext";
+import { Button } from "./ui/button";
+import Link from "next/link";
 
-const Navbar = () => {
+interface NavbarProps {
+  name: string;
+  role: "Doctor" | "Patient" | "Admin";
+}
+
+const Navbar = ({ name, role }: NavbarProps) => {
+  const { logout } = useAuth();
+
   return (
-    <div className="flex items-center justify-between p-4">
+    <div className="flex items-center justify-between p-4 lg:px-8">
       {/* SEARCH BAR */}
       <div className="hidden md:flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-300 px-2">
         <Image src="/search.png" alt="" width={14} height={14} />
@@ -23,17 +41,37 @@ const Navbar = () => {
             1
           </div>
         </div>
-        <div className="flex flex-col">
-          <span className="text-xs leading-3 font-medium">John Doe</span>
-          <span className="text-[10px] text-gray-500 text-right">Admin</span>
+        <div className="flex flex-col items-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <Image
+                src="/icons/avatar.png"
+                alt="avatar"
+                width={36}
+                height={36}
+                className="rounded-full"
+              />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel className="uppercase">
+                {name}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <Link href={"/patient/profile"}>Profile</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>Billing</DropdownMenuItem>
+              <DropdownMenuItem>Team</DropdownMenuItem>
+              <Button asChild onClick={logout}>
+                <DropdownMenuItem>Logout</DropdownMenuItem>
+              </Button>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <div className="flex flex-col">
+            <span className="text-[10px] text-gray-500 text-right">{role}</span>
+          </div>
         </div>
-        <Image
-          src="/icons/avatar.png"
-          alt=""
-          width={36}
-          height={36}
-          className="rounded-full"
-        />
       </div>
     </div>
   );

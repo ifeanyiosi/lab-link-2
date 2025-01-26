@@ -1,5 +1,6 @@
 "use client";
 
+import { Edit } from "lucide-react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useState } from "react";
@@ -30,10 +31,7 @@ const FormModal = ({
     | "lab"
     | "doctor"
     | "test"
-    | "class"
-    | "lesson"
     | "exam"
-    | "assignment"
     | "result"
     | "attendance"
     | "event"
@@ -84,7 +82,7 @@ const FormModal = ({
         className={`${size} flex items-center justify-center rounded-full ${bgColor}`}
         onClick={() => setOpen(true)}
       >
-        <Image src={`/${type}.png`} alt="" width={16} height={16} />
+        <Edit />
       </button>
       {open && (
         <div
