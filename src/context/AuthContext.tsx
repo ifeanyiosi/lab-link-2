@@ -16,6 +16,7 @@ export interface UserDetails {
   role: string; // Ensure this exists in Firestore
   firstName: string;
   lastName: string;
+  phone: string;
 }
 
 interface AuthContextProps {
