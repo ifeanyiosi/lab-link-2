@@ -16,7 +16,7 @@ const menuItems = [
       {
         icon: "/calendar.png",
         label: "Schedule Appointment",
-        href: "/patient/create-appointment",
+        href: "/patient/appointment/create-appointment",
         visible: ["patient"],
       },
       {
