@@ -13,14 +13,14 @@ import Link from "next/link";
 
 interface NavbarProps {
   name: string;
-  role: "Doctor" | "Patient" | "Admin";
+  role: string;
 }
 
 const Navbar = ({ name, role }: NavbarProps) => {
   const { logout } = useAuth();
 
   return (
-    <div className="flex items-center justify-between p-4 lg:px-8">
+    <header className="flex sticky z-[200] top-0  bg-white items-center justify-between p-4 lg:px-8 w-full ">
       {/* SEARCH BAR */}
       <div className="hidden md:flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-300 px-2">
         <Image src="/search.png" alt="" width={14} height={14} />
@@ -52,7 +52,7 @@ const Navbar = ({ name, role }: NavbarProps) => {
                 className="rounded-full"
               />
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
+            <DropdownMenuContent className="flex flex-col items-start justify-start gap-2">
               <DropdownMenuLabel className="uppercase">
                 {name}
               </DropdownMenuLabel>
@@ -60,9 +60,7 @@ const Navbar = ({ name, role }: NavbarProps) => {
               <DropdownMenuItem>
                 <Link href={"/patient/profile"}>Profile</Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>Billing</DropdownMenuItem>
-              <DropdownMenuItem>Team</DropdownMenuItem>
-              <Button asChild onClick={logout}>
+              <Button className="w-full" asChild onClick={logout}>
                 <DropdownMenuItem>Logout</DropdownMenuItem>
               </Button>
             </DropdownMenuContent>
@@ -73,7 +71,7 @@ const Navbar = ({ name, role }: NavbarProps) => {
           </div>
         </div>
       </div>
-    </div>
+    </header>
   );
 };
 

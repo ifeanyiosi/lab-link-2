@@ -1,4 +1,5 @@
 "use client";
+
 import React, { createContext, useContext, useEffect, useState } from "react";
 import {
   onAuthStateChanged,
@@ -9,19 +10,12 @@ import {
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/firebase/firebaseConfig";
 
-// Include the necessary fields from the Firestore patient collection
-interface UserDetails {
-  uid: string; // Adding uid here
+export interface UserDetails {
+  uid: string;
   email: string;
-  displayName: string;
-  role: string;
-  createdAt: string;
+  role: string; // Ensure this exists in Firestore
   firstName: string;
   lastName: string;
-  phone: string;
-  address: string;
-  gender: string;
-  // Add any other fields you need
 }
 
 interface AuthContextProps {
@@ -42,33 +36,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
-          // Fetch user details from the 'patient' collection in Firestore
-          const userDoc = await getDoc(doc(db, "patient", firebaseUser.uid));
+          const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
           if (userDoc.exists()) {
             const userData = userDoc.data() as UserDetails;
-            // Include firebaseUser.uid here
             setUser({ ...userData, uid: firebaseUser.uid });
           } else {
             console.error("User document not found");
+            setUser(null);
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
+          setUser(null);
         }
       } else {
         setUser(null);
       }
-      setLoading(false);
+      setLoading(false); // Always set loading to false
     });
 
     return () => unsubscribe();
   }, []);
 
   const logout = async () => {
-    const auth = getAuth();
     try {
       await signOut(auth);
-      setUser(null); // Clear the user state
-      console.log("User logged out successfully");
+      setUser(null);
     } catch (error) {
       console.error("Error signing out: ", error);
     }
@@ -76,7 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <AuthContext.Provider value={{ user, loading, logout }}>
-      {loading ? <p>Loading...</p> : children}
+      {children} {/* Always render children, even during loading */}
     </AuthContext.Provider>
   );
 };

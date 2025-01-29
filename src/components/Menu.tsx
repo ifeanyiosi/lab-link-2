@@ -1,83 +1,91 @@
-import { role } from "@/lib/data";
+/* eslint-disable @next/next/no-img-element */
+import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
 import Link from "next/link";
 
 const menuItems = [
   {
-    title: "MAIN",
+    title: "Dashboard",
     items: [
       {
         icon: "/home.png",
         label: "Home",
-        href: "/",
-        visible: ["admin", "doctor", "patient", "labTech"],
-      },
-      {
-        icon: "/book.png",
-        label: "Labs",
-        href: "/list/labs",
-        visible: ["admin"],
-      },
-      {
-        icon: "/book.png",
-        label: "Book a test",
-        href: "/labs",
-        visible: ["patient", "admin"],
-      },
-      {
-        icon: "/subject.png",
-        label: "My Lab Tests",
-        href: "/my-tests",
-        visible: ["patient", "labTech"],
+        href: "/patient",
+        visible: ["patient"],
       },
       {
         icon: "/calendar.png",
-        label: "Appointments",
-        href: "/list/appointments",
-        visible: ["patient", "doctor", "admin", "labTech"],
+        label: "Schedule Appointment",
+        href: "/patient/create-appointment",
+        visible: ["patient"],
       },
       {
-        icon: "/patient.png",
-        label: "Patients",
-        href: "/list/patients",
-        visible: ["admin"],
-      },
-      {
-        icon: "/doctor.png",
-        label: "Doctors",
-        href: "/list/doctors",
-        visible: ["admin"],
-      },
-
-      {
-        icon: "/messages.png",
-        label: "Messages",
-        href: "/messages",
-        visible: ["patient", "doctor", "admin", "labTech"],
-      },
-      {
-        icon: "/subject.png",
-        label: "Lab Tests",
-        href: "/list/tests",
-        visible: ["admin"],
-      },
-      {
-        icon: "/subject.png",
-        label: "Available Tests",
-        href: "/tests",
-        visible: ["patient", "doctor", "admin", "labTech"],
-      },
-      {
-        icon: "/anat.png",
-        label: "Announcements",
-        href: "/list/announcement",
-        visible: ["admin"],
+        icon: "/time.png",
+        label: "My Appointments",
+        href: "/patient/appointment/appointments/",
+        visible: ["patient"],
       },
       {
         icon: "/result.png",
-        label: "Results",
-        href: "/list/results",
-        visible: ["admin", "patient"],
+        label: "Test Results",
+        href: "/patient/test-results/",
+        visible: ["patient"],
+      },
+      {
+        icon: "/file.png",
+        label: "Medical Records",
+        href: "/patient/records/",
+        visible: ["patient"],
+      },
+      {
+        icon: "/messages.png",
+        label: "Messages",
+        href: "/patient/messages/",
+        visible: ["patient"],
+      },
+
+      {
+        icon: "/location.png",
+        label: "Find a Lab",
+        href: "/list/labs/",
+        visible: ["patient"],
+      },
+
+      {
+        icon: "/home.png",
+        label: "Home",
+        href: "/lab",
+        visible: ["lab"],
+      },
+      {
+        icon: "/time.png",
+        label: "My Appointments",
+        href: "/lab/appointments/",
+        visible: ["lab"],
+      },
+      {
+        icon: "/beaker.png",
+        label: "Test Orders",
+        href: "/lab/test/",
+        visible: ["lab"],
+      },
+      {
+        icon: "/result.png",
+        label: "Results Processing",
+        href: "/lab/test/",
+        visible: ["lab"],
+      },
+      {
+        icon: "/inventory.png",
+        label: "Inventory Management ",
+        href: "/lab/test/",
+        visible: ["lab"],
+      },
+      {
+        icon: "/messages.png",
+        label: "Messages",
+        href: "/lab/messages/",
+        visible: ["lab"],
       },
     ],
   },
@@ -85,32 +93,33 @@ const menuItems = [
     title: "OTHER",
     items: [
       {
-        icon: "/profile.png",
-        label: "Profile",
+        icon: "/faq.png",
+        label: "Support & FAQs",
         href: "/profile",
-        visible: ["admin", "doctor", "patient", "labTech"],
+        visible: ["admin", "doctor", "patient", "lab"],
       },
       {
         icon: "/settings.png",
         label: "Settings",
         href: "/settings",
-        visible: ["admin", "doctor", "patient", "labTech"],
-      },
-      {
-        icon: "/logout.png",
-        label: "Logout",
-        href: "/logout",
-        visible: ["admin", "doctor", "patient", "labTech"],
+        visible: ["admin", "doctor", "patient", "lab"],
       },
     ],
   },
 ];
 
 const Menu = () => {
+  const { user, loading, logout } = useAuth();
+  const role = user?.role || "";
+
+  if (loading) {
+    return <div>Loading...</div>; // Or a spinner
+  }
+
   return (
     <div className="mt-4 text-sm">
       {menuItems.map((section) => (
-        <div className="flex flex-col gap-6" key={section.title}>
+        <div className="flex flex-col gap-6 py-2" key={section.title}>
           <span className="hidden lg:block text-gray-400 font-light my-4">
             {section.title}
           </span>
@@ -132,9 +141,27 @@ const Menu = () => {
                 </Link>
               );
             }
+            return null; // Explicitly return null for non-visible items
           })}
         </div>
       ))}
+
+      <div className="py-8 hidden lg:block w-full">
+        <button
+          className="flex w-f hover:bg-primary hover:text-white p-2 w-full items-center gap-2"
+          onClick={logout}
+          type="button"
+        >
+          <Image
+            width={20}
+            height={20}
+            className="h-[20px] w-[20px] "
+            src="/logout.png"
+            alt="logout button"
+          />{" "}
+          <span className="">Logout</span>
+        </button>
+      </div>
     </div>
   );
 };

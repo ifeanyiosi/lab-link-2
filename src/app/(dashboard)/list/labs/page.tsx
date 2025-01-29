@@ -1,126 +1,194 @@
 "use client";
 
-import FormModal from "@/components/FormModal";
-import Pagination from "@/components/Pagination";
-import Table from "@/components/Table";
-import TableSearch from "@/components/TableSearch";
-import { role, labsData } from "@/lib/data";
-import Image from "next/image";
-import Link from "next/link";
+import { useEffect, useState } from "react";
+import { collection, getDocs, query, where, addDoc } from "firebase/firestore";
+import { db } from "@/firebase/firebaseConfig";
+import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
-type Labs = {
-  id: number;
-  teacherId: string;
-  name: string; // Lab name
-  email?: string;
-  photo: string;
+interface Lab {
+  id: string;
+  labName: string;
+  email: string;
+  address: string;
   phone: string;
-  testsAvailable: string[]; // List of tests available in the lab
-  location: string;
-};
+  operatingHours: {
+    openingTime: string;
+    closingTime: string;
+  };
+  services: string[];
+  state: string;
+  town: string;
+}
 
-const columns = [
-  {
-    header: "Lab Info",
-    accessor: "info",
-  },
-  {
-    header: "Lab ID",
-    accessor: "teacherId",
-    className: "hidden md:table-cell",
-  },
-  {
-    header: "Tests Available",
-    accessor: "tests", // Changed to "tests" to represent available tests in the lab
-    className: "hidden md:table-cell",
-  },
-  {
-    header: "Phone",
-    accessor: "phone",
-    className: "hidden lg:table-cell",
-  },
-  {
-    header: "Address",
-    accessor: "address",
-    className: "hidden lg:table-cell",
-  },
-  {
-    header: "Actions",
-    accessor: "action",
-  },
-];
+const AvailableLabs = () => {
+  const [labs, setLabs] = useState<Lab[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const labsPerPage = 5;
 
-const LabsListPage = () => {
   const router = useRouter();
 
-  const renderRow = (item: Labs) => (
-    <tr
-      key={item.id}
-      className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
-    >
-      <td className="flex items-center gap-4 p-4">
-        <Image
-          src={item.photo}
-          alt=""
-          width={40}
-          height={40}
-          className="md:hidden xl:block w-10 h-10 rounded-full object-cover"
-        />
-        <div className="flex flex-col">
-          <h3 className="font-semibold">{item.name}</h3>{" "}
-          {/* Display lab name */}
-          <p className="text-xs text-gray-500">{item?.email}</p>
-        </div>
-      </td>
-      <td className="hidden md:table-cell">{item.id}</td>
-      <td className="hidden md:table-cell">
-        {item.testsAvailable?.length
-          ? item.testsAvailable.join(",")
-          : "No tests available"}
-      </td>
-      {/* Display list of tests */}
-      <td className="hidden md:table-cell">{item.phone}</td>
-      <td className="hidden md:table-cell">{item.location}</td>
-      <td>
-        <div className="flex items-center gap-2">
-          <Link href={`/list/labs/${item.id}`}>
-            <button className="w-7 h-7 flex items-center justify-center rounded-full bg-lamaSky">
-              <Image src="/view.png" alt="" width={16} height={16} />
-            </button>
-          </Link>
-          {role === "admin" && (
-            <FormModal table="lab" type="delete" id={item.id} />
-          )}
-        </div>
-      </td>
-    </tr>
+  useEffect(() => {
+    const fetchLabs = async () => {
+      try {
+        const labsQuery = query(
+          collection(db, "users"),
+          where("role", "==", "lab")
+        );
+        const querySnapshot = await getDocs(labsQuery);
+        const labsList: Lab[] = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          labsList.push({
+            id: doc.id,
+            labName: data.labName,
+            email: data.email,
+            address: data.address,
+            phone: data.phone,
+            operatingHours: {
+              openingTime: data.operatingHours?.openingTime || "N/A",
+              closingTime: data.operatingHours?.closingTime || "N/A",
+            },
+            services: data.services || [],
+            state: data.state,
+            town: data.town,
+          });
+        });
+        setLabs(labsList);
+      } catch (error) {
+        console.error("Error fetching labs:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLabs();
+  }, []);
+
+  const totalPages = Math.ceil(labs.length / labsPerPage);
+  const paginatedLabs = labs.slice(
+    (currentPage - 1) * labsPerPage,
+    currentPage * labsPerPage
   );
 
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const handleMakeAppointment = async (labId: string, labName: string) => {
+    try {
+      // Simulate user ID for the appointment
+      const userId = "currentUser123"; // Replace with the actual logged-in user ID
+
+      const appointment = {
+        labId,
+        labName,
+        userId,
+        appointmentDate: new Date().toISOString(), // Set to current date; adjust as needed
+        status: "Scheduled",
+        notes: "",
+      };
+
+      await addDoc(collection(db, "appointments"), appointment);
+      alert(`Appointment created with ${labName}`);
+    } catch (error) {
+      console.error("Error creating appointment:", error);
+      alert("Failed to create an appointment. Please try again.");
+    }
+  };
+
+  const handleGetDirections = (address: string) => {
+    const encodedAddress = encodeURIComponent(address);
+    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`;
+    window.open(googleMapsUrl, "_blank");
+  };
+
+  if (loading) return <p>Loading labs...</p>;
+
   return (
-    <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
-      {/* TOP */}
-      <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">All Labs</h1>
-        <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-          <TableSearch />
-          <div className="flex items-center gap-4 self-end">
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-              <Image src="/filter.png" alt="" width={14} height={14} />
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-              <Image src="/sort.png" alt="" width={14} height={14} />
-            </button>
-            {role === "admin" && <FormModal table="lab" type="create" />}
-          </div>
-        </div>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Available Labs</h1>
+      {paginatedLabs.length > 0 ? (
+        <ul className="space-y-4">
+          {paginatedLabs.map((lab) => (
+            <li
+              key={lab.id}
+              className="p-4 border rounded-lg shadow-md bg-white space-y-2"
+            >
+              <h3 className="text-xl font-semibold">{lab.labName}</h3>
+              <p className="text-sm text-gray-600">
+                <strong>Email:</strong> {lab.email}
+              </p>
+              <p className="text-sm text-gray-600">
+                <strong>Phone:</strong> {lab.phone}
+              </p>
+              <p className="text-sm text-gray-600">
+                <strong>Address:</strong> {lab.address}
+              </p>
+              <p className="text-sm text-gray-600">
+                <strong>Operating Hours:</strong>{" "}
+                {lab.operatingHours.openingTime} -{" "}
+                {lab.operatingHours.closingTime}
+              </p>
+              <p className="text-sm text-gray-600">
+                <strong>Services:</strong>{" "}
+                {lab.services.length > 0
+                  ? lab.services.join(", ")
+                  : "No services listed"}
+              </p>
+              <p className="text-sm text-gray-600">
+                <strong>Location:</strong> {lab.town}, {lab.state}
+              </p>
+              <div className="flex space-x-4 mt-4">
+                <Button
+                  variant="default"
+                  onClick={() => handleMakeAppointment(lab.id, lab.labName)}
+                >
+                  Make Appointment
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => handleGetDirections(lab.address)}
+                >
+                  Get Directions
+                </Button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No labs available at the moment.</p>
+      )}
+      <div className="flex justify-between items-center mt-6">
+        <Button
+          variant="outline"
+          disabled={currentPage === 1}
+          onClick={handlePreviousPage}
+        >
+          Previous
+        </Button>
+        <span className="text-sm text-gray-600">
+          Page {currentPage} of {totalPages}
+        </span>
+        <Button
+          variant="outline"
+          disabled={currentPage === totalPages}
+          onClick={handleNextPage}
+        >
+          Next
+        </Button>
       </div>
-      {/* LIST */}
-      <Table columns={columns} renderRow={renderRow} data={labsData} />
-      {/* PAGINATION */}
-      <Pagination />
     </div>
   );
 };
 
-export default LabsListPage;
+export default AvailableLabs;

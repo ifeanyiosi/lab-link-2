@@ -1,83 +1,63 @@
-import FormModal from "@/components/FormModal";
-import Pagination from "@/components/Pagination";
-import Table from "@/components/Table";
-import TableSearch from "@/components/TableSearch";
-import Image from "next/image";
-import { role, testsData } from "@/lib/data"; // Adjust to your actual data file
+"use client";
+import AvailableLabs from "@/components/AvaliableLabs";
+import { useState } from "react";
 
-type Test = {
-  id: number;
-  name: string;
-  description: string;
-  price: string;
-};
 
-const columns = [
-  {
-    header: "Test Name",
-    accessor: "name",
-  },
-  {
-    header: "Description",
-    accessor: "description",
-    className: "hidden md:table-cell",
-  },
-  {
-    header: "Price",
-    accessor: "price",
-  },
-  {
-    header: "Actions",
-    accessor: "action",
-  },
-];
+const AvailableTests = () => {
+  const [selectedTests, setSelectedTests] = useState<string[]>([]);
+  const [showLabs, setShowLabs] = useState(false);
 
-const TestsListPage = () => {
-  const renderRow = (item: Test) => (
-    <tr
-      key={item.id}
-      className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-lamaPurpleLight"
-    >
-      <td className="p-4">{item.name}</td>
-      <td className="hidden md:table-cell">{item.description}</td>
-      <td>{item.price}</td>
-      <td>
-        <div className="flex items-center gap-2">
-          {role === "admin" && (
-            <>
-              <FormModal table="test" type="update" data={item} />
-              <FormModal table="test" type="delete" id={item.id} />
-            </>
-          )}
-        </div>
-      </td>
-    </tr>
-  );
+  // Predefined list of tests. This could be fetched from Firestore if necessary.
+  const allTests = [
+    "Blood Test",
+    "X-Ray",
+    "MRI",
+    "Ultrasound",
+    "CT Scan",
+    "Covid Test",
+  ];
+
+  // Handle test selection
+  const handleTestChange = (test: string) => {
+    setSelectedTests((prev) =>
+      prev.includes(test) ? prev.filter((t) => t !== test) : [...prev, test]
+    );
+  };
+
+  // Submit the selected tests and show labs offering them
+  const handleSearchLabs = () => {
+    setShowLabs(true);
+  };
 
   return (
-    <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
-      {/* TOP */}
-      <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">All Tests</h1>
-        <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-          <TableSearch />
-          <div className="flex items-center gap-4 self-end">
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-              <Image src="/filter.png" alt="Filter" width={14} height={14} />
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
-              <Image src="/sort.png" alt="Sort" width={14} height={14} />
-            </button>
-            {role === "admin" && <FormModal table="test" type="create" />}
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-6">Select Tests</h1>
+      <div className="space-y-2">
+        {allTests.map((test) => (
+          <div key={test} className="flex items-center">
+            <input
+              type="checkbox"
+              id={test}
+              checked={selectedTests.includes(test)}
+              onChange={() => handleTestChange(test)}
+              className="mr-2"
+            />
+            <label htmlFor={test}>{test}</label>
           </div>
-        </div>
+        ))}
       </div>
-      {/* LIST */}
-      <Table columns={columns} renderRow={renderRow} data={testsData} />
-      {/* PAGINATION */}
-      <Pagination />
+      <button
+        onClick={handleSearchLabs}
+        disabled={selectedTests.length === 0}
+        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+      >
+        Search Labs Offering Selected Tests
+      </button>
+
+      {/* Show Labs Component */}
+      {showLabs && <AvailableLabs selectedTests={selectedTests} />}
     </div>
   );
 };
 
-export default TestsListPage;
+export default AvailableTests;

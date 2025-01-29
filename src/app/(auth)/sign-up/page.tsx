@@ -17,7 +17,7 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import Select from "react-select";
+import Select, { SingleValue } from "react-select";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -27,11 +27,35 @@ import { auth, db } from "@/firebase/firebaseConfig";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
+const stateTownMapping = {
+  Lagos: [
+    { value: "Ikeja", label: "Ikeja" },
+    { value: "Surulere", label: "Surulere" },
+    { value: "Lekki", label: "Lekki" },
+  ],
+  Enugu: [
+    { value: "Nsukka", label: "Nsukka" },
+    { value: "Awgu", label: "Awgu" },
+    { value: "Enugu North", label: "Enugu North" },
+  ],
+  Kano: [
+    { value: "Gwale", label: "Gwale" },
+    { value: "Nasarawa", label: "Nasarawa" },
+    { value: "Tarauni", label: "Tarauni" },
+  ],
+};
+
+const stateOptions = Object.keys(stateTownMapping).map((state) => ({
+  value: state,
+  label: state,
+}));
+
 const SignupPage = () => {
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
+  const [towns, setTowns] = useState<{ value: string; label: string }[]>([]);
 
   const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
@@ -43,6 +67,8 @@ const SignupPage = () => {
       address: "",
       password: "",
       confirmPassword: "",
+      state: "",
+      town: "",
       role: "patient",
       gender: "Male", // Ensure gender is added to the form values
     },
@@ -61,6 +87,8 @@ const SignupPage = () => {
         phone,
         address,
         gender,
+        state,
+        town,
       } = data;
 
       // Sign up with email/password
@@ -72,11 +100,13 @@ const SignupPage = () => {
       const user = userCredential.user;
 
       // After signup, save the user's role and other info to Firestore
-      await setDoc(doc(db, "patient", user.uid), {
+      await setDoc(doc(db, "users", user.uid), {
         email: user.email,
         firstName,
         lastName,
         phone,
+        state,
+        town,
         address,
         role, // Save the role selected by the user
         gender, // Save the gender
@@ -104,7 +134,7 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row items-center md:items-start min-h-screen">
+    <div className="flex flex-col md:flex-row items-center md:items-start h-screen">
       {/* Left Side - Image */}
       <div className="w-full md:w-1/2 relative h-48 md:h-screen">
         <Image
@@ -117,7 +147,7 @@ const SignupPage = () => {
       </div>
 
       {/* Right Side - Form */}
-      <div className="w-full md:w-1/2 flex mt-4 lg:h-screen justify-center items-center p-2">
+      <div className="w-full md:w-1/2 flex mt-4 lg:min-h-screen overflow-y-auto justify-center items-center p-2">
         <Card className="w-full max-w-md">
           <CardContent>
             <h1 className="text-xl font-semibold mb-4 py-2 text-start">
@@ -213,6 +243,64 @@ const SignupPage = () => {
                       )}
                     />
                   </div>
+
+                  <FormField
+                    control={form.control}
+                    name="state"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Label>State</Label>
+                        <Select
+                          options={stateOptions}
+                          value={
+                            field.value
+                              ? { value: field.value, label: field.value }
+                              : null
+                          }
+                          onChange={(
+                            selected: SingleValue<{
+                              value: string;
+                              label: string;
+                            }>
+                          ) => {
+                            field.onChange(selected?.value);
+                            setTowns(
+                              stateTownMapping[
+                                selected?.value as keyof typeof stateTownMapping
+                              ] || []
+                            );
+                          }}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {/* Town Field */}
+                  <FormField
+                    control={form.control}
+                    name="town"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Label>Town</Label>
+                        <Select
+                          options={towns}
+                          value={
+                            field.value
+                              ? { value: field.value, label: field.value }
+                              : null
+                          }
+                          onChange={(
+                            selected: SingleValue<{
+                              value: string;
+                              label: string;
+                            }>
+                          ) => field.onChange(selected?.value)}
+                          isDisabled={!towns.length}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   {/* Address */}
                   <div>

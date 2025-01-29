@@ -1,40 +1,37 @@
 "use client";
 
-import Announcements from "@/components/Announcements";
-import EventCalendar from "@/components/EventCalendar";
 import Menu from "@/components/Menu";
 import Navbar from "@/components/Navbar";
 import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react"; // Import useEffect
+import { useEffect } from "react"; // Add useEffect
 
-export default function DashboardLayout({
+export default function LabLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const { user, loading } = useAuth();
-  console.log(user);
   const router = useRouter();
 
-  // Redirect to sign-in if user is not authenticated
+  // Add useEffect for navigation
   useEffect(() => {
     if (!loading && !user) {
       router.push("/sign-in");
     }
-  }, [user, loading, router]); // Add dependencies to avoid unnecessary re-runs
+    // Add role check if needed
+    if (!loading && user?.role !== "lab") {
+      router.push("/"); // Or another route
+    }
+  }, [user, loading, router]); // Add dependencies
 
   if (loading) {
     return <p>Loading...</p>;
   }
 
-  // If there's no user, don't render anything (the useEffect will handle the redirect)
-  if (!user) {
-    return null;
-  }
-
+  // Don't return null here - let useEffect handle the redirect
   return (
     <div className="h-screen flex">
       {/* LEFT */}
@@ -54,18 +51,12 @@ export default function DashboardLayout({
         <Menu />
       </div>
       {/* RIGHT */}
-      <div className="w-full bg-[#F7F8FA] overflow-scroll flex ">
-        <div className="flex flex-col w-full ">
-          <Navbar name={user?.firstName || ""} role={user?.role} />
-          <div className="w-full flex flex-col lg:flex-row">
-            <div className="w-full">{children}</div>
-            <div className="w-full xl:w-1/3 flex flex-col lg:gap-8">
-              <EventCalendar />
-
-              <Announcements />
-            </div>
-          </div>
-        </div>
+      <div className="w-[86%] md:w-[92%] lg:w-[84%] xl:w-[86%] bg-[#F7F8FA] overflow-scroll flex flex-col">
+        <Navbar
+          name={user?.firstName || ""}
+          role={(user?.role as "Doctor" | "Patient" | "Admin") || "Patient"}
+        />
+        {children}
       </div>
     </div>
   );

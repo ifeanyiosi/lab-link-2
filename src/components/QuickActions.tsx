@@ -16,13 +16,13 @@ export default function QuickActions() {
         </Link>
         <Link
           className="p-3 rounded-md bg-yellow-100"
-          href="/labs/appointments"
+          href="/patient/appointment/appointments"
         >
           Manage Appointments
         </Link>
 
-        <Link className="p-3 rounded-md bg-blue-100" href="/labs/tests">
-          Patients
+        <Link className="p-3 rounded-md bg-blue-100" href="/list/labs">
+          Avaliable Labs
         </Link>
         <Link className="p-3 rounded-md bg-green-100" href="/labs/reports">
           Consult a Doctor
