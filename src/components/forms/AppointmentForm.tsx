@@ -205,11 +205,11 @@ export default function AppointmentForm() {
           <p className="text-gray-500 text-center">No labs found.</p>
         )}
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid w-full gap-4 md:grid-cols-1 lg:grid-cols-3">
           {labs.map((lab) => (
             <div
               key={lab.email}
-              className="p-5 border rounded-lg shadow-md bg-white transition hover:shadow-lg"
+              className="lg:p-5 p-2 w-full border rounded-lg shadow-md bg-white transition hover:shadow-lg"
             >
               <h4 className="text-lg font-semibold text-gray-900">
                 {lab.labName}
@@ -225,7 +225,7 @@ export default function AppointmentForm() {
                 <span className="font-medium">{lab.services.join(", ")}</span>
               </p>
 
-              <div className="flex gap-2 mt-4">
+              <div className="flex flex-col lg:flex-row gap-2 mt-4">
                 <Button
                   onClick={() => handleMakeAppointment(lab)}
                   className="flex items-center gap-2"

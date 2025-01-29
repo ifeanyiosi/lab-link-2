@@ -4,7 +4,7 @@ import React from "react";
 export default function page() {
   return (
     <div className="min-h-screen bg-gray-100 lg:py-8 px-4 lg:px-8 lg:max-w-7xl">
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 py-4">
         <h1 className="text-3xl font-bold text-start mb-6">
           Find a Lab - Search Results
         </h1>
