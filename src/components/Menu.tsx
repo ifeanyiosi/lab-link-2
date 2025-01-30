@@ -5,7 +5,6 @@ import Link from "next/link";
 
 const menuItems = [
   {
-    title: "Dashboard",
     items: [
       {
         icon: "/home.png",
@@ -87,6 +86,12 @@ const menuItems = [
         href: "/lab/messages/",
         visible: ["lab"],
       },
+      {
+        icon: "/settings.png",
+        label: "Settings",
+        href: "/settings",
+        visible: ["admin", "doctor", "patient", "lab"],
+      },
     ],
   },
   {
@@ -117,9 +122,9 @@ const Menu = () => {
   }
 
   return (
-    <div className="mt-4 text-sm">
+    <div className=" flex flex-col overflow-y-auto min-h-screen text-sm">
       {menuItems.map((section) => (
-        <div className="flex flex-col gap-6 py-2" key={section.title}>
+        <div className="flex flex-col gap-10 py-8" key={section.title}>
           <span className="hidden lg:block text-gray-400 font-light my-4">
             {section.title}
           </span>
@@ -132,10 +137,11 @@ const Menu = () => {
                   className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-lamaSkyLight"
                 >
                   <Image
+                    className="w-[50px]"
                     src={item.icon}
                     alt={item.label}
-                    width={20}
-                    height={20}
+                    width={50}
+                    height={50}
                   />
                   <span className="hidden lg:block">{item.label}</span>
                 </Link>

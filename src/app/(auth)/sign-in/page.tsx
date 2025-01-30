@@ -17,21 +17,23 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "@/firebase/firebaseConfig";
-import { useToast } from "@/hooks/use-toast";
+import { Bounce, toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { useAuth, UserDetails } from "@/context/AuthContext";
 import { doc, getDoc } from "firebase/firestore";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const SigninPage = () => {
   const router = useRouter();
-  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const { user } = useAuth(); // Get the authenticated user from context
+  const [redirecting, setRedirecting] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true); // For initial auth check
+  const { user } = useAuth();
 
-  // Set up the form using react-hook-form and zod
   const form = useForm<z.infer<typeof signinSchema>>({
     resolver: zodResolver(signinSchema),
     defaultValues: {
@@ -40,81 +42,128 @@ const SigninPage = () => {
     },
   });
 
-  // Handle form submission
+  // Initial auth check skeleton
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
+      if (firebaseUser) {
+        // If user is already logged in, redirect immediately
+        const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data() as UserDetails;
+          router.replace(
+            userData.role === "patient"
+              ? "/patient"
+              : userData.role === "lab"
+              ? "/lab"
+              : "/"
+          );
+        }
+      }
+      setCheckingAuth(false);
+    });
+
+    return () => unsubscribe();
+  }, [router]);
+
   const onSubmit = async (data: z.infer<typeof signinSchema>) => {
     setLoading(true);
     try {
       const { email, password } = data;
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const userDoc = await getDoc(doc(db, "users", userCredential.user.uid));
 
-      // Sign in with email/password
-      await signInWithEmailAndPassword(auth, email, password);
+      if (!userDoc.exists()) throw new Error("User data not found");
+      const userData = userDoc.data() as UserDetails;
 
-      // Show success toast
-      toast({
-        title: "Welcome back!",
-        description: "You have successfully signed in.",
-        className: "bg-[#43b38c] text-[#FFF8E7] p-4 rounded-lg shadow-lg mt-20",
+      toast.success("Success!", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: true,
+        transition: Bounce,
+        theme: "dark",
       });
 
-      // Reset the form
-      form.reset();
+      setRedirecting(true);
+      setTimeout(() => {
+        router.replace(
+          userData.role === "patient"
+            ? "/patient"
+            : userData.role === "lab"
+            ? "/lab"
+            : "/"
+        );
+      }, 2000);
     } catch (err) {
-      // Show error toast
       console.error("Sign-in error:", err);
-      toast({
-        title: "Error",
-        description: "Invalid email or password. Please try again.",
-        className: "bg-red-500 text-[#FFF8E7] p-4 rounded-lg shadow-lg mt-20",
+      toast.error("Invalid email or password. Please try again.", {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "dark",
       });
     } finally {
       setLoading(false);
     }
   };
 
-  // Listen for authentication state changes
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        // Fetch user details from Firestore
-        getDoc(doc(db, "users", firebaseUser.uid)).then((userDoc) => {
-          if (userDoc.exists()) {
-            const userData = userDoc.data() as UserDetails;
-            // Redirect based on role
-            if (userData.role === "patient") {
-              router.replace("/patient");
-            } else if (userData.role === "lab") {
-              router.replace("/lab");
-            } else {
-              // Default fallback route
-              router.replace("/");
-            }
-          }
-        });
-      }
-    });
+  if (checkingAuth) {
+    // Show skeleton while checking initial auth state
+    return (
+      <div className="flex max-h-screen w-full">
+        <div className="hidden md:block md:w-1/2 lg:w-2/5 h-screen relative">
+          <Skeleton className="h-full w-full" />
+        </div>
 
-    // Cleanup the observer on unmount
-    return () => unsubscribe();
-  }, [router]);
+        <div className="w-full md:w-1/2 lg:w-3/5 flex flex-col justify-center items-center p-6">
+          <Skeleton className="h-12 w-48 mb-8" />
+
+          <Card className="w-full max-w-md">
+            <CardContent className="space-y-6">
+              <Skeleton className="h-8 w-1/3 mb-6" />
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              </div>
+
+              <Skeleton className="h-12 w-full" />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col md:flex-row items-center md:items-start min-h-screen">
+    <div className="flex max-h-screen w-full">
       {/* Left Side - Image */}
-      <div className="w-full md:w-1/2 relative h-48 md:h-screen">
+      <div className="hidden md:block md:w-1/2 lg:w-2/5 h-screen relative">
         <Image
           src="/images/sign-in.jpg"
           alt="Sign In Image"
           layout="fill"
           objectFit="cover"
-          className="rounded-t-md"
+          className="fixed top-0 left-0 w-1/2 lg:w-2/5 h-screen"
         />
       </div>
 
       {/* Right Side - Form */}
-      <div className="w-full md:w-1/2 flex flex-col mt-4 lg:h-screen justify-center items-center p-2">
-        <Link className="text-5xl font-bold text-black" href={"/"}>
-          Lab Link
-        </Link>
+      <div className="w-full md:w-1/2 lg:w-3/5 flex flex-col justify-center items-center p-6 overflow-y-auto">
+        <div className="py-5">
+          <Link className="text-5xl font-bold text-black" href={"/"}>
+            Lab Link
+          </Link>
+        </div>
 
         <Card className="w-full max-w-md">
           <CardContent>
@@ -168,12 +217,22 @@ const SigninPage = () => {
 
                 {/* Submit Button */}
                 <Button
-                  className="rounded-[24px] text-white w-full lg:w-auto mt-5 min-w-[140px] py-4 px-8"
+                  className="rounded-[24px] text-white w-full lg:w-auto mt-5 min-w-[140px] py-4 px-8 flex items-center justify-center gap-2"
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || redirecting}
                 >
-                  {loading ? (
-                    <span className="spinner-border animate-spin w-5 h-5 mr-2 border-t-2 border-white"></span>
+                  {redirecting ? (
+                    "Redirecting..."
+                  ) : loading ? (
+                    <motion.div
+                      className="w-5 h-5 border-4 border-t-transparent border-white rounded-full"
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        repeat: Infinity,
+                        duration: 0.6,
+                        ease: "linear",
+                      }}
+                    />
                   ) : (
                     "Sign In"
                   )}
@@ -181,6 +240,15 @@ const SigninPage = () => {
               </form>
             </Form>
           </CardContent>
+          <div className="text-center py-4">
+            <span className="text-gray-600">Don&apos;t have an account? </span>
+            <Link
+              href="/sign-up"
+              className="text-primary font-semibold hover:underline"
+            >
+              Sign Up
+            </Link>
+          </div>
         </Card>
       </div>
     </div>

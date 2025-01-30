@@ -36,9 +36,9 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="h-screen flex">
+    <div className="min-h-screen flex">
       {/* LEFT */}
-      <div className="w-[14%] md:w-[8%] lg:w-[16%] xl:w-[14%] p-4">
+      <div className="w-[20%] h-full md:w-[8%] lg:w-[16%] xl:w-[14%] p-4">
         <Link
           href="/"
           className="flex items-center justify-center lg:justify-start gap-2"
@@ -46,15 +46,15 @@ export default function DashboardLayout({
           <Image
             src="/icons/lab-link-logo.png"
             alt="logo"
-            width={32}
-            height={32}
+            width={20}
+            height={20}
           />
           <span className="hidden lg:block font-bold">Lablink</span>
         </Link>
         <Menu />
       </div>
       {/* RIGHT */}
-      <div className="w-full bg-[#F7F8FA] overflow-scroll flex ">
+      <div className="w-full bg-[#F7F8FA] overflow-y-auto flex ">
         <div className="flex flex-col w-full ">
           <Navbar name={user?.firstName || ""} role={user?.role} />
           <div className="w-full flex flex-col lg:flex-row">

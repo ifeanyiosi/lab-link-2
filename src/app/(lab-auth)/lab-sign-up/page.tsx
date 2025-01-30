@@ -24,9 +24,12 @@ import {
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/firebase/firebaseConfig";
-import { useToast } from "@/hooks/use-toast";
+
 import { useRouter } from "next/navigation";
 import { labSignupSchema } from "@/validations/sign-up";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { Bounce, toast } from "react-toastify";
 
 const stateTownMapping = {
   Lagos: [
@@ -53,7 +56,7 @@ const stateOptions = Object.keys(stateTownMapping).map((state) => ({
 
 const LabSignupPage = () => {
   const router = useRouter();
-  const { toast } = useToast();
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [towns, setTowns] = useState<{ value: string; label: string }[]>([]);
@@ -122,39 +125,43 @@ const LabSignupPage = () => {
         createdAt: new Date(),
       });
 
-      toast({
-        title: "Success!",
-        description: "Lab account created successfully!",
-        className: "bg-[#43b38c] text-[#FFF8E7] p-4 rounded-lg shadow-lg mt-20",
+      toast.success("Success!", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: true,
+        transition: Bounce,
+        theme: "dark",
       });
 
       router.push("/lab");
       form.reset();
     } catch (err) {
       setError("Error: " + (err as Error).message);
-      toast({
-        title: "Error",
-        description: "Signup failed. Please try again.",
-        className: "bg-red-500 text-[#FFF8E7] p-4 rounded-lg shadow-lg mt-20",
-      });
+      toast.error("Invalid email or password. Please try again.", {
+              position: "top-right",
+              autoClose: 2000,
+              theme: "dark",
+            });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col md:flex-row items-center md:items-start h-screen">
-      <div className="w-full md:w-1/2 relative h-48 md:h-screen">
-        <Image
-          src="/images/lab-signup.jpg"
-          alt="Lab Signup Image"
-          layout="fill"
-          objectFit="cover"
-          className="rounded-t-md"
-        />
+    <div className="flex  h-screen w-full">
+      <div className="w-full hidden md:block md:w-1/2 relative h-48 md:h-screen">
+        <div className="hidden md:block md:w-1/2 fixed top-0 left-0 h-screen">
+          <Image
+            src="/images/lab-sign-in.jpg"
+            alt="Signup Image"
+            layout="fill"
+            objectFit="cover"
+            className="rounded-t-md"
+          />
+        </div>
       </div>
-      <div className="w-full md:w-1/2 flex mt-4 lg:min-h-screen overflow-y-auto justify-center items-center p-2">
-        <Card className="w-full max-w-md">
+      <div className="w-full md:w-1/2 h-screen overflow-y-auto py-5 p-4 ">
+        <Card className="w-full    max-w-md">
           <CardContent>
             <h1 className="text-xl font-semibold mb-4 py-2 text-start">
               Lab Signup
@@ -209,70 +216,80 @@ const LabSignupPage = () => {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="firstName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <Label htmlFor="firstName">Your First Name</Label>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Enter registration number"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="lastName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <Label htmlFor="lastName">Your Last Name</Label>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Enter registration number"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <Label htmlFor="email">Email</Label>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Enter your professional email"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <Label htmlFor="phone">Phone</Label>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Enter your business phone number"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="flex flex-col md:flex-row gap-4 w-full items-center md:justify-between ">
+                    <div className="w-full">
+                      <Label htmlFor="firstName">First Name</Label>
+                      <FormField
+                        control={form.control}
+                        name="firstName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                placeholder="Enter your first name"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    {/* Last Name */}
+                    <div className="w-full">
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <FormField
+                        control={form.control}
+                        name="lastName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                placeholder="Enter your last name"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col md:flex-row gap-4 w-full items-center md:justify-between">
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <Label htmlFor="email">Email</Label>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Enter your professional email"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <Label htmlFor="phone">Phone</Label>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Enter your business phone number"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                   <FormField
                     control={form.control}
                     name="state"
@@ -390,41 +407,45 @@ const LabSignupPage = () => {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="operatingHours.openingTime"
-                    render={({ field }) => (
-                      <FormItem>
-                        <Label htmlFor="openingTime">Opening Time</Label>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="time"
-                            placeholder="E.g., 08:00"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="operatingHours.closingTime"
-                    render={({ field }) => (
-                      <FormItem>
-                        <Label htmlFor="closingTime">Closing Time</Label>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="time"
-                            placeholder="E.g., 18:00"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="flex flex-col md:flex-row gap-4 w-full items-start  ">
+                    {" "}
+                    <FormField
+                      control={form.control}
+                      name="operatingHours.openingTime"
+                      render={({ field }) => (
+                        <FormItem>
+                          <Label htmlFor="openingTime">Opening Time</Label>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="time"
+                              placeholder="E.g., 08:00"
+                              className="w-full"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="operatingHours.closingTime"
+                      render={({ field }) => (
+                        <FormItem>
+                          <Label htmlFor="closingTime">Closing Time</Label>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="time"
+                              placeholder="E.g., 18:00"
+                              className="w-full"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
                   <FormField
                     control={form.control}
@@ -464,16 +485,37 @@ const LabSignupPage = () => {
                   />
                 </div>
                 <Button
+                  className="rounded-[24px] text-white w-full lg:w-auto mt-5 min-w-[140px] py-4 px-8 flex items-center justify-center gap-2"
                   type="submit"
                   disabled={loading}
-                  className="mt-4 w-full"
                 >
-                  {loading ? "Signing Up..." : "Sign Up"}
+                  {loading ? (
+                    <motion.div
+                      className="w-5 h-5 border-4 border-t-transparent border-white rounded-full"
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        repeat: Infinity,
+                        duration: 0.6,
+                        ease: "linear",
+                      }}
+                    />
+                  ) : (
+                    "Sign Up"
+                  )}
                 </Button>
               </form>
             </Form>
           </CardContent>
         </Card>
+        <div className="text-start mt-4">
+          <span className="text-gray-600">Already have an account? </span>
+          <Link
+            href="/sign-in"
+            className="text-primary font-semibold hover:underline"
+          >
+            Sign In
+          </Link>
+        </div>
       </div>
     </div>
   );

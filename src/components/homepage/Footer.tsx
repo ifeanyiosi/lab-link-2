@@ -1,70 +1,192 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
-import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { FiFacebook, FiTwitter, FiLinkedin, FiInstagram } from "react-icons/fi";
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-gray-800 text-white">
-      <div className="max-w-7xl mx-auto px-4 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <footer className="border-t border-gray-200 bg-white pt-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid md:grid-cols-5 gap-8 mb-12">
           {/* Company Info */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">LabLink</h3>
-            {/* <p className="text-sm">
-              A brief description of your company and what it does.
-            </p> */}
+          <div className="md:col-span-2">
+            <h4 className="font-bold text-lg mb-4 text-gray-900">Lab Link</h4>
+            <p className="text-gray-600 text-sm mb-6">
+              Revolutionizing healthcare connectivity through innovative
+              technology solutions for patients and laboratories.
+            </p>
+            <div className="flex space-x-4">
+              <a href="#" className="text-gray-400 hover:text-blue-600">
+                <FiFacebook size={20} />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-blue-600">
+                <FiTwitter size={20} />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-blue-600">
+                <FiLinkedin size={20} />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-blue-600">
+                <FiInstagram size={20} />
+              </a>
+            </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Patients */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-2">
+            <h4 className="font-semibold text-gray-900 mb-4">Patients</h4>
+            <ul className="space-y-3 text-sm">
               <li>
-                <Link href="/about" className="hover:text-gray-300">
-                  About Us
+                <Link
+                  href="/sign-up"
+                  className="text-gray-600 hover:text-blue-600 hover:underline"
+                >
+                  Create Account
                 </Link>
               </li>
               <li>
-                <Link href="/services" className="hover:text-gray-300">
-                  Services
+                <Link
+                  href="/results"
+                  className="text-gray-600 hover:text-blue-600 hover:underline"
+                >
+                  View Results
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-gray-300">
-                  Contact
+                <Link
+                  href="/pricing"
+                  className="text-gray-600 hover:text-blue-600 hover:underline"
+                >
+                  Pricing Plans
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="hover:text-gray-300">
-                  Privacy Policy
+                <Link
+                  href="/faq"
+                  className="text-gray-600 hover:text-blue-600 hover:underline"
+                >
+                  Patient FAQ
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Social Media */}
+          {/* Laboratories */}
           <div>
-            <h3 className="text-lg  mb-4">Follow Us</h3>
-            <div className="flex space-x-4">
-              <Link href="#" className="hover:text-gray-300">
-                <Facebook size={24} />
-              </Link>
-              <Link href="#" className="hover:text-gray-300">
-                <Twitter size={24} />
-              </Link>
-              <Link href="#" className="hover:text-gray-300">
-                <Instagram size={24} />
-              </Link>
-              <Link href="#" className="hover:text-gray-300">
-                <Linkedin size={24} />
-              </Link>
-            </div>
+            <h4 className="font-semibold text-gray-900 mb-4">Laboratories</h4>
+            <ul className="space-y-3 text-sm">
+              <li>
+                <Link
+                  href="/lab-sign-up"
+                  className="text-gray-600 hover:text-blue-600 hover:underline"
+                >
+                  Lab Registration
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/integration"
+                  className="text-gray-600 hover:text-blue-600 hover:underline"
+                >
+                  System Integration
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/lab-services"
+                  className="text-gray-600 hover:text-blue-600 hover:underline"
+                >
+                  Services
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/api-docs"
+                  className="text-gray-600 hover:text-blue-600 hover:underline"
+                >
+                  Developer API
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact & Legal */}
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-4">Company</h4>
+            <ul className="space-y-3 text-sm">
+              <li>
+                <Link
+                  href="/about"
+                  className="text-gray-600 hover:text-blue-600 hover:underline"
+                >
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact"
+                  className="text-gray-600 hover:text-blue-600 hover:underline"
+                >
+                  Contact Support
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/blog"
+                  className="text-gray-600 hover:text-blue-600 hover:underline"
+                >
+                  Blog
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/careers"
+                  className="text-gray-600 hover:text-blue-600 hover:underline"
+                >
+                  Careers
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/privacy"
+                  className="text-gray-600 hover:text-blue-600 hover:underline"
+                >
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/terms"
+                  className="text-gray-600 hover:text-blue-600 hover:underline"
+                >
+                  Terms of Service
+                </Link>
+              </li>
+            </ul>
           </div>
         </div>
 
-        {/* Copyright */}
-        <div className="mt-8 pt-8 border-t border-gray-700 text-sm text-center">
-          © {new Date().getFullYear()} Company Name. All rights reserved.
+        {/* Divider */}
+        <div className="border-t border-gray-200 pt-8 pb-4">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="text-sm text-gray-600 mb-4 md:mb-0">
+              © {new Date().getFullYear()} Lab Link. All rights reserved.
+            </div>
+            <div className="flex space-x-6">
+              <Link
+                href="/sitemap"
+                className="text-sm text-gray-600 hover:text-blue-600"
+              >
+                Sitemap
+              </Link>
+              <Link
+                href="/accessibility"
+                className="text-sm text-gray-600 hover:text-blue-600"
+              >
+                Accessibility
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </footer>

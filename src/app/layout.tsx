@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "@/components/ui/toaster";
+import { ToastContainer } from "react-toastify";
 import { AuthProvider } from "@/context/AuthContext";
 import { Analytics } from "@vercel/analytics/react";
 
@@ -21,7 +21,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <AuthProvider>
-          {children} <Analytics /> <Toaster />{" "}
+          {children} <Analytics /> <ToastContainer />
         </AuthProvider>
       </body>
     </html>

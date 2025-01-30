@@ -3,7 +3,20 @@ import { useEffect, useState } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/firebase/firebaseConfig";
 import { useAuth } from "@/context/AuthContext";
-import { Appointment } from "@/components/forms/AppointmentForm";
+
+export interface Appointment {
+  id?: string;
+  userId: string;
+  labId: string;
+  date: string;
+  time: string;
+  tests: string[];
+  status: "pending" | "confirmed" | "completed" | "canceled";
+  notes?: string;
+  labName: string;
+  patientFirstName: string;
+  patientLastName: string;
+}
 
 export default function PatientDashboard() {
   const { user } = useAuth();
@@ -31,7 +44,7 @@ export default function PatientDashboard() {
 
         const appointmentsData: Appointment[] = [];
         querySnapshot.forEach((doc) => {
-          appointmentsData.push(doc.data() as Appointment);
+          appointmentsData.push({ id: doc.id, ...doc.data() } as Appointment);
         });
 
         setAppointments(appointmentsData);
@@ -117,7 +130,7 @@ export default function PatientDashboard() {
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredAppointments.map((appointment) => (
-          <div key={appointment.labId} className="mb-4 p-4 border rounded">
+          <div key={appointment.id} className="mb-4 p-4 border rounded">
             <p>
               <strong>Lab ID:</strong> {appointment.labId}
             </p>
@@ -128,14 +141,29 @@ export default function PatientDashboard() {
               <strong>Date:</strong> {appointment.date}
             </p>
             <p>
-              <strong>Time:</strong> {appointment.time}
+              <strong>Date:</strong>{" "}
+              {new Date(appointment.date).toLocaleDateString()}
             </p>
             <p>
               <strong>Tests:</strong> {appointment.tests.join(", ")}
             </p>
-            <p>
-              <strong>Status:</strong> {appointment.status}
+            <p className="flex items-center gap-2">
+              <strong>Status:</strong>
+              <span
+                className={`px-2 py-1 rounded-md text-sm ${
+                  appointment.status === "pending"
+                    ? "bg-yellow-100 text-yellow-800"
+                    : appointment.status === "confirmed"
+                    ? "bg-green-100 text-green-800"
+                    : appointment.status === "completed"
+                    ? "bg-blue-100 text-blue-800"
+                    : "bg-red-100 text-red-800"
+                }`}
+              >
+                {appointment.status}
+              </span>
             </p>
+
             {appointment.notes && (
               <p>
                 <strong>Notes:</strong> {appointment.notes}

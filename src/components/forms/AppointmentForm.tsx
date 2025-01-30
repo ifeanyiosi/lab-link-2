@@ -18,7 +18,8 @@ import { Button } from "../ui/button";
 import { CalendarCheck, MapPin } from "lucide-react";
 
 // Define types for the lab object
-interface Lab {
+export interface Lab {
+  id: string;
   email: string;
   labName: string;
   address: string;
@@ -42,6 +43,8 @@ export interface Appointment {
   status: "pending" | "confirmed" | "completed" | "canceled";
   notes?: string; // Add notes field
   labName: string; // Add this field
+  patientFirstName: string;
+  patientLastName: string;
 }
 
 // Hardcoded states and towns in Nigeria
@@ -96,7 +99,10 @@ export default function AppointmentForm() {
       const querySnapshot = await getDocs(q);
       const labsData: Lab[] = [];
       querySnapshot.forEach((doc) => {
-        labsData.push(doc.data() as Lab);
+        labsData.push({
+          id: doc.id, // Capture Firestore document ID
+          ...doc.data(),
+        } as Lab);
       });
 
       setLabs(labsData);
@@ -129,13 +135,15 @@ export default function AppointmentForm() {
 
     const appointment: Appointment = {
       userId: user?.uid || "", // Use the current user's UID
-      labId: selectedLab.email,
+      labId: selectedLab.id,
       date,
       time,
       tests: selectedTests,
       status: "pending",
       notes, // Include notes in the appointment
       labName: selectedLab.labName, // Include lab name
+      patientFirstName: user?.firstName || "",
+      patientLastName: user?.lastName || "",
     };
 
     try {
@@ -326,10 +334,7 @@ export default function AppointmentForm() {
               />
             </div>
             <div className="flex gap-2">
-              <Button
-                onClick={handleSubmitAppointment}
-                className=""
-              >
+              <Button onClick={handleSubmitAppointment} className="">
                 Submit
               </Button>
               <Button

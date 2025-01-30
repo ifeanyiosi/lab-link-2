@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { signupSchema } from "@/validations/sign-up";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { motion } from "framer-motion";
 import {
   Form,
   FormControl,
@@ -24,8 +25,9 @@ import {
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/firebase/firebaseConfig";
-import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Bounce, toast } from "react-toastify";
 
 const stateTownMapping = {
   Lagos: [
@@ -52,7 +54,6 @@ const stateOptions = Object.keys(stateTownMapping).map((state) => ({
 
 const SignupPage = () => {
   const router = useRouter();
-  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [towns, setTowns] = useState<{ value: string; label: string }[]>([]);
@@ -113,20 +114,22 @@ const SignupPage = () => {
         createdAt: new Date(),
       });
 
-      toast({
-        title: "Success!",
-        description: "Signed Up!",
-        className: "bg-[#43b38c] text-[#FFF8E7] p-4 rounded-lg shadow-lg mt-20",
+      toast.success("Success!", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: true,
+        transition: Bounce,
+        theme: "dark",
       });
 
       router.push("/patient");
       form.reset();
     } catch (err) {
       setError("Error: " + (err as Error).message);
-      toast({
-        title: "Error",
-        description: "Failed. Please try again.",
-        className: "bg-red-500 text-[#FFF8E7] p-4 rounded-lg shadow-lg mt-20",
+      toast.error("Invalid email or password. Please try again.", {
+        position: "top-right",
+        autoClose: 2000,
+        theme: "dark",
       });
     } finally {
       setLoading(false);
@@ -134,66 +137,70 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row items-center md:items-start h-screen">
+    <div className="flex  h-screen w-full ">
       {/* Left Side - Image */}
-      <div className="w-full md:w-1/2 relative h-48 md:h-screen">
-        <Image
-          src="/images/sign-up.jpg"
-          alt="Signup Image"
-          layout="fill"
-          objectFit="cover"
-          className="rounded-t-md"
-        />
+      <div className="w-full hidden md:block md:w-1/2 relative h-48 md:h-screen">
+        <div className="hidden md:block md:w-1/2 fixed top-0 left-0 h-screen">
+          <Image
+            src="/images/sign-up.jpg"
+            alt="Signup Image"
+            layout="fill"
+            objectFit="cover"
+            className="rounded-t-md"
+          />
+        </div>
       </div>
 
       {/* Right Side - Form */}
-      <div className="w-full md:w-1/2 flex mt-4 lg:min-h-screen overflow-y-auto justify-center items-center p-2">
-        <Card className="w-full max-w-md">
+      <div className="w-full lg:flex flex-col md:items-center md:justify-center md:w-1/2 h-screen overflow-y-auto py-5 p-4">
+        <Card className="w-full    max-w-md  ">
           <CardContent>
             <h1 className="text-xl font-semibold mb-4 py-2 text-start">
-              Sign Up
+              Patient Sign Up
             </h1>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)}>
                 <div className="flex flex-col gap-4">
                   {/* First Name */}
-                  <div>
-                    <Label htmlFor="firstName">First Name</Label>
-                    <FormField
-                      control={form.control}
-                      name="firstName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              placeholder="Enter your first name"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                  <div className="flex flex-col md:flex-row gap-4 w-full items-center md:justify-between ">
+                    <div className="w-full">
+                      <Label htmlFor="firstName">First Name</Label>
+                      <FormField
+                        control={form.control}
+                        name="firstName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                placeholder="Enter your first name"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
-                  {/* Last Name */}
-                  <div>
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <FormField
-                      control={form.control}
-                      name="lastName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              placeholder="Enter your last name"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {/* Last Name */}
+                    <div className="w-full">
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <FormField
+                        control={form.control}
+                        name="lastName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                placeholder="Enter your last name"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                   </div>
 
                   {/* Email */}
@@ -387,12 +394,20 @@ const SignupPage = () => {
 
                   {/* Submit Button */}
                   <Button
-                    className="rounded-[24px] text-white w-full lg:w-auto mt-5 min-w-[140px] py-4 px-8"
+                    className="rounded-[24px] text-white w-full lg:w-auto mt-5 min-w-[140px] py-4 px-8 flex items-center justify-center gap-2"
                     type="submit"
                     disabled={loading}
                   >
                     {loading ? (
-                      <span className="spinner-border animate-spin w-5 h-5 mr-2 border-t-2 border-white"></span>
+                      <motion.div
+                        className="w-5 h-5 border-4 border-t-transparent border-white rounded-full"
+                        animate={{ rotate: 360 }}
+                        transition={{
+                          repeat: Infinity,
+                          duration: 0.6,
+                          ease: "linear",
+                        }}
+                      />
                     ) : (
                       "Sign Up"
                     )}
@@ -402,6 +417,15 @@ const SignupPage = () => {
             </Form>
           </CardContent>
         </Card>
+        <div className="text-center mt-4">
+          <span className="text-gray-600">Already have an account? </span>
+          <Link
+            href="/sign-in"
+            className="text-primary font-semibold hover:underline"
+          >
+            Sign In
+          </Link>
+        </div>
       </div>
     </div>
   );
