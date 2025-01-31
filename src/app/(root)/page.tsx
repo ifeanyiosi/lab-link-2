@@ -5,107 +5,98 @@ import Link from "next/link";
 const Homepage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-12">
-        {/* Enhanced Hero Section */}
+      <div className="container mx-auto px-4 py-12 max-w-7xl">
+        {/* Hero Section */}
         <div className="text-center space-y-6 mb-16">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4">
-            Welcome to <span className="text-primary">Lab Link</span>
+          <h1 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-4">
+            Welcome to Lab Link
           </h1>
           <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
             Your Gateway to Modern Healthcare Collaboration - Connecting
             Patients, Laboratories, and Healthcare Providers in Real-Time
           </p>
 
-          {/* Stats Banner */}
+          {/* Action Cards */}
           <div className="grid md:grid-cols-3 gap-6">
-            {/* Patient Card */}
-            <Link
-              href="/sign-up"
-              className="group relative flex flex-col items-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-2"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity" />
-              <div className="mb-4 bg-blue-100 p-4 rounded-full">
-                <svg
-                  className="w-12 h-12 text-blue-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+            {[
+              {
+                href: "/sign-up",
+                icon: (
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth="2"
                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                   />
-                </svg>
-              </div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                Patient Sign Up
-              </h2>
-              <p className="text-gray-600 text-center text-sm md:text-base">
-                Get started with seamless health management and lab results
-                tracking
-              </p>
-            </Link>
-
-            {/* Lab Card */}
-            <Link
-              href="/lab-sign-up"
-              className="group relative flex flex-col items-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-2"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity" />
-              <div className="mb-4 bg-purple-100 p-4 rounded-full">
-                <svg
-                  className="w-12 h-12 text-purple-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                ),
+                title: "Patient Sign Up",
+                description:
+                  "Get started with seamless health management and lab results tracking",
+                bgGradient: "from-blue-500 to-indigo-600",
+                iconBg: "bg-blue-100",
+                iconColor: "text-blue-600",
+              },
+              {
+                href: "/lab-sign-up",
+                icon: (
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth="2"
                     d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
                   />
-                </svg>
-              </div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                Lab Sign Up
-              </h2>
-              <p className="text-gray-600 text-center text-sm md:text-base">
-                Connect with patients and manage test results efficiently
-              </p>
-            </Link>
-
-            {/* Sign In Card */}
-            <Link
-              href="/sign-in"
-              className="group relative flex flex-col items-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-2"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-gray-600 to-gray-800 rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity" />
-              <div className="mb-4 bg-gray-100 p-4 rounded-full">
-                <svg
-                  className="w-12 h-12 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                ),
+                title: "Lab Sign Up",
+                description:
+                  "Connect with patients and manage test results efficiently",
+                bgGradient: "from-purple-500 to-pink-600",
+                iconBg: "bg-purple-100",
+                iconColor: "text-purple-600",
+              },
+              {
+                href: "/sign-in",
+                icon: (
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth="2"
                     d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
                   />
-                </svg>
-              </div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                Sign In
-              </h2>
-              <p className="text-gray-600 text-center text-sm md:text-base">
-                Access your account to manage your health or lab services
-              </p>
-            </Link>
+                ),
+                title: "Sign In",
+                description:
+                  "Access your account to manage your health or lab services",
+                bgGradient: "from-gray-600 to-gray-800",
+                iconBg: "bg-gray-100",
+                iconColor: "text-gray-600",
+              },
+            ].map((card, index) => (
+              <Link
+                key={index}
+                href={card.href}
+                className="group relative flex flex-col items-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-2"
+              >
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${card.bgGradient} rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity`}
+                />
+                <div className={`mb-4 ${card.iconBg} p-4 rounded-full`}>
+                  <svg
+                    className={`w-12 h-12 ${card.iconColor}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    {card.icon}
+                  </svg>
+                </div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                  {card.title}
+                </h2>
+                <p className="text-gray-600 text-center text-sm md:text-base">
+                  {card.description}
+                </p>
+              </Link>
+            ))}
           </div>
         </div>
 
@@ -136,35 +127,6 @@ const Homepage = () => {
                 Real-time updates and digital reports
               </p>
             </div>
-          </div>
-        </section>
-
-        {/* Original Action Cards */}
-        <section className="mb-16  hidden">
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Patient Card */}
-            <Link
-              href="/sign-up"
-              className="group relative flex flex-col items-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-2"
-            >
-              {/* ... existing patient card content ... */}
-            </Link>
-
-            {/* Lab Card */}
-            <Link
-              href="/lab-sign-up"
-              className="group relative flex flex-col items-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-2"
-            >
-              {/* ... existing lab card content ... */}
-            </Link>
-
-            {/* Sign In Card */}
-            <Link
-              href="/sign-in"
-              className="group relative flex flex-col items-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-2"
-            >
-              {/* ... existing sign-in card content ... */}
-            </Link>
           </div>
         </section>
 

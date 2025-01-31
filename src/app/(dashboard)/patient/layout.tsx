@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,6 +8,7 @@ import { Menu as MenuIcon, X } from "lucide-react";
 import EventCalendar from "@/components/EventCalendar";
 import Announcements from "@/components/Announcements";
 import RightSidebar from "@/components/RightSidebar";
+import { useRouter } from "next/navigation";
 
 interface MenuItem {
   icon: string;
@@ -26,9 +27,28 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
+  const router = useRouter();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const { user, loading, logout } = useAuth();
   const role = user?.role || "";
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/sign-in");
+    }
+  }, [user, loading, router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // Return null while redirecting
+  }
 
   const menuItems: MenuSection[] = [
     {
@@ -72,7 +92,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         {
           icon: "/location.png",
           label: "Find a Lab",
-          href: "/list/labs/",
+          href: "/patient/find-lab",
           visible: ["patient"],
         },
         { icon: "/home.png", label: "Home", href: "/lab", visible: ["lab"] },
@@ -132,18 +152,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       ],
     },
   ];
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row overflow-hidden">

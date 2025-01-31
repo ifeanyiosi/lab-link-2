@@ -34,7 +34,7 @@ const RightSidebar = () => {
   ];
 
   return (
-    <div className="w-80 space-y-6 px-4 ">
+    <div className="lg:w-80 w-full space-y-6 ">
       {/* Notifications Section */}
       <Card>
         <CardHeader className="pb-3">

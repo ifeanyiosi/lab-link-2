@@ -31,7 +31,7 @@ const SigninPage = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
-  const [checkingAuth, setCheckingAuth] = useState(true); // For initial auth check
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const { user } = useAuth();
 
   const form = useForm<z.infer<typeof signinSchema>>({
@@ -42,21 +42,23 @@ const SigninPage = () => {
     },
   });
 
-  // Initial auth check skeleton
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
       if (firebaseUser) {
-        // If user is already logged in, redirect immediately
-        const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
-        if (userDoc.exists()) {
-          const userData = userDoc.data() as UserDetails;
-          router.replace(
-            userData.role === "patient"
-              ? "/patient"
-              : userData.role === "lab"
-              ? "/lab"
-              : "/"
-          );
+        try {
+          const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data() as UserDetails;
+            router.replace(
+              userData.role === "patient"
+                ? "/patient"
+                : userData.role === "lab"
+                ? "/lab"
+                : "/"
+            );
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
         }
       }
       setCheckingAuth(false);
@@ -88,7 +90,7 @@ const SigninPage = () => {
       });
 
       setRedirecting(true);
-      setTimeout(() => {
+      const redirectTimer = setTimeout(() => {
         router.replace(
           userData.role === "patient"
             ? "/patient"
@@ -97,6 +99,8 @@ const SigninPage = () => {
             : "/"
         );
       }, 2000);
+
+      return () => clearTimeout(redirectTimer);
     } catch (err) {
       console.error("Sign-in error:", err);
       toast.error("Invalid email or password. Please try again.", {
@@ -110,36 +114,31 @@ const SigninPage = () => {
   };
 
   if (checkingAuth) {
-    // Show skeleton while checking initial auth state
     return (
       <div className="flex max-h-screen w-full">
         <div className="hidden md:block md:w-1/2 lg:w-2/5 h-screen relative">
-          <Skeleton className="h-full w-full" />
+          <Skeleton className="w-full h-full" />
         </div>
-
         <div className="w-full md:w-1/2 lg:w-3/5 flex flex-col justify-center items-center p-6">
-          <Skeleton className="h-12 w-48 mb-8" />
-
-          <Card className="w-full max-w-md">
-            <CardContent className="space-y-6">
-              <Skeleton className="h-8 w-1/3 mb-6" />
-
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-16" />
-                  <Skeleton className="h-10 w-full" />
-                </div>
-
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-16" />
-                  <Skeleton className="h-10 w-full" />
-                </div>
-              </div>
-
-              <Skeleton className="h-12 w-full" />
-            </CardContent>
-          </Card>
+          <Skeleton className="h-12 w-32 mb-8" />
+          <Skeleton className="h-96 w-full max-w-md" />
         </div>
+      </div>
+    );
+  }
+
+  if (redirecting) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <motion.div
+          className="w-12 h-12 border-4 border-t-transparent border-primary rounded-full"
+          animate={{ rotate: 360 }}
+          transition={{
+            repeat: Infinity,
+            duration: 0.8,
+            ease: "linear",
+          }}
+        />
       </div>
     );
   }
@@ -151,9 +150,10 @@ const SigninPage = () => {
         <Image
           src="/images/sign-in.jpg"
           alt="Sign In Image"
-          layout="fill"
+          fill
           objectFit="cover"
           className="fixed top-0 left-0 w-1/2 lg:w-2/5 h-screen"
+          priority
         />
       </div>
 
