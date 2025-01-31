@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
@@ -10,7 +12,6 @@ import {
   Scan,
   Calendar as CalendarIcon,
 } from "lucide-react";
-
 
 type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
@@ -96,7 +97,6 @@ const EventCalendar = () => {
       {/* Main Content */}
       <div className="flex flex-col lg:flex-row">
         {/* Calendar Section */}
-        
 
         {/* Events Section */}
         <div className="lg:w-1/2 p-6 bg-gray-50">
