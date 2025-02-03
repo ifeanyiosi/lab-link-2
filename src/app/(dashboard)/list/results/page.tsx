@@ -60,7 +60,7 @@ const ResultListPage = () => {
     >
       <td className="flex items-center gap-4 p-4">{item.testName}</td>
       <td>{item.patient}</td>
-      <td className="hidden md:table-cell">{item.result}</td>{" "}
+      <td className="hidden md:table-cell">{item.result}</td>
       {/* Display result as a string */}
       <td className="hidden md:table-cell">{item.doctor}</td>
       <td className="hidden md:table-cell">{item.testDate}</td>

@@ -4,6 +4,8 @@ import { useState } from "react";
 import { collection, query, where, getDocs, addDoc } from "firebase/firestore";
 import { db } from "@/firebase/firebaseConfig";
 import { useAuth } from "@/context/AuthContext";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
@@ -64,10 +66,11 @@ export default function AppointmentForm() {
   const [time, setTime] = useState("");
   const [selectedTests, setSelectedTests] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
+  const [bookingLoading, setBookingLoading] = useState(false);
 
   const handleSearch = async () => {
     if (!selectedState || !selectedTown) {
-      setError("Please select both state and town.");
+      toast.error("Please select both state and town.");
       return;
     }
 
@@ -90,8 +93,11 @@ export default function AppointmentForm() {
       });
 
       setLabs(labsData);
+      if (labsData.length === 0) {
+        toast.info("No labs found in this location.");
+      }
     } catch (err) {
-      setError("Failed to fetch labs. Please try again.");
+      toast.error("Failed to fetch labs. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -100,9 +106,11 @@ export default function AppointmentForm() {
 
   const handleSubmitAppointment = async () => {
     if (!selectedLab || !date || !time || selectedTests.length === 0) {
-      setError("Please fill out all required fields.");
+      toast.error("Please fill out all required fields.");
       return;
     }
+
+    setBookingLoading(true);
 
     try {
       const appointment: Appointment = {
@@ -119,17 +127,36 @@ export default function AppointmentForm() {
       };
 
       await addDoc(collection(db, "appointments"), appointment);
+
+      toast.success("Appointment booked successfully!");
       setIsModalOpen(false);
-      setError("");
-      alert("Appointment booked successfully!");
+      setSelectedTests([]);
+      setNotes("");
+      setDate("");
+      setTime("");
     } catch (err) {
-      setError("Failed to book appointment. Please try again.");
+      toast.error("Failed to book appointment. Please try again.");
       console.error(err);
+    } finally {
+      setBookingLoading(false);
     }
   };
 
   return (
     <div className="max-w-7xl mx-auto">
+      <ToastContainer
+        theme="dark"
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={true}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+
       {/* Search Section */}
       <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
@@ -187,13 +214,6 @@ export default function AppointmentForm() {
         </div>
       </div>
 
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
-          <p className="text-red-700">{error}</p>
-        </div>
-      )}
-
       {/* Labs Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {labs.map((lab) => (
@@ -220,7 +240,7 @@ export default function AppointmentForm() {
                 <div className="flex items-center gap-2 text-gray-600">
                   <Clock size={18} />
                   <p>
-                    {lab.operatingHours.openingTime} -{" "}
+                    {lab.operatingHours.openingTime} -
                     {lab.operatingHours.closingTime}
                   </p>
                 </div>
@@ -243,7 +263,7 @@ export default function AppointmentForm() {
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex flex-col gap-3">
                 <Button
                   onClick={() => {
                     setSelectedLab(lab);
@@ -371,10 +391,11 @@ export default function AppointmentForm() {
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
               <Button
                 onClick={handleSubmitAppointment}
+                disabled={bookingLoading}
                 className="flex-1 flex items-center justify-center gap-2"
               >
                 <CalendarCheck size={18} />
-                Confirm Booking
+                {bookingLoading ? "Booking..." : "Confirm Booking"}
               </Button>
               <Button
                 variant="outline"

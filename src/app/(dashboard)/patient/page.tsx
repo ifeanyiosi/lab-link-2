@@ -1,8 +1,16 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  Timestamp,
+} from "firebase/firestore";
+
 import {
   Calendar,
   Clock,
@@ -12,24 +20,30 @@ import {
   Plus,
   ChevronRight,
   Bell,
+  Loader2,
 } from "lucide-react";
+import { db } from "@/firebase/firebaseConfig";
 
-const PatientDashboard = () => {
-  const { user } = useAuth();
+interface Appointment {
+  date: string;
+  time: string;
+  labName: string;
+  tests: string[];
+  status: string;
+}
+
+interface TestResult {
+  date: string;
+  test: string;
+  status: string;
+}
+
+const PatientDashboard: React.FC = () => {
+  const { user, loading } = useAuth();
   const router = useRouter();
-
-  // Sample data - replace with real data
-  const upcomingAppointment = {
-    date: "Feb 2, 2024",
-    time: "10:30 AM",
-    lab: "Central Lab",
-    test: "Blood Work",
-  };
-
-  const recentResults = [
-    { date: "Jan 28, 2024", test: "Cholesterol Panel", status: "Ready" },
-    { date: "Jan 15, 2024", test: "Blood Sugar", status: "Ready" },
-  ];
+  const [upcomingAppointment, setUpcomingAppointment] =
+    useState<Appointment | null>(null);
+  const [recentResults, setRecentResults] = useState<TestResult[]>([]);
 
   const quickActions = [
     {
@@ -61,6 +75,65 @@ const PatientDashboard = () => {
       color: "bg-orange-100 text-orange-600",
     },
   ];
+
+  useEffect(() => {
+    const fetchAppointmentsAndResults = async () => {
+      if (!user) return;
+
+      // Fetch upcoming appointments
+      const appointmentsRef = collection(db, "appointments");
+      const appointmentsQuery = query(
+        appointmentsRef,
+        where("userId", "==", user.uid),
+        where("status", "==", "pending")
+      );
+
+      const appointmentsSnapshot = await getDocs(appointmentsQuery);
+      const appointments = appointmentsSnapshot.docs.map(
+        (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+            date: doc.data().date,
+            time: doc.data().time,
+            labName: doc.data().labName,
+            tests: doc.data().tests,
+            status: doc.data().status,
+          } as Appointment)
+      );
+
+      // Sort and take the earliest appointment
+      const sortedAppointments = appointments.sort(
+        (a, b) =>
+          new Date(`${a.date} ${a.time}`).getTime() -
+          new Date(`${b.date} ${b.time}`).getTime()
+      );
+      setUpcomingAppointment(sortedAppointments[0] || null);
+
+      // Fetch recent test results
+      const resultsRef = collection(db, "test-results");
+      const resultsQuery = query(resultsRef, where("userId", "==", user.uid));
+
+      const resultsSnapshot = await getDocs(resultsQuery);
+      const results = resultsSnapshot.docs.map(
+        (doc) =>
+          ({
+            date: doc.data().date,
+            test: doc.data().test,
+            status: doc.data().status,
+          } as TestResult)
+      );
+
+      // Sort results by most recent
+      const sortedResults = results
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 2);
+
+      setRecentResults(sortedResults);
+    };
+
+    fetchAppointmentsAndResults();
+  }, [user]);
 
   if (!user) {
     router.push("/sign-in");
@@ -122,7 +195,11 @@ const PatientDashboard = () => {
             </button>
           </div>
 
-          {upcomingAppointment ? (
+          {loading ? (
+            <div className="flex justify-center items-center py-6">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+            </div>
+          ) : upcomingAppointment ? (
             <div className="border rounded-lg p-4">
               <div className="flex items-start gap-4">
                 <div className="bg-blue-100 p-3 rounded-lg">
@@ -130,10 +207,10 @@ const PatientDashboard = () => {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-medium text-gray-800">
-                    {upcomingAppointment.test}
+                    {upcomingAppointment.tests?.join(", ")}
                   </h3>
                   <p className="text-sm text-gray-600 mt-1">
-                    {upcomingAppointment.lab}
+                    {upcomingAppointment.labName}
                   </p>
                   <div className="flex items-center gap-3 mt-3">
                     <div className="flex items-center gap-1 text-sm text-gray-600">
@@ -179,25 +256,33 @@ const PatientDashboard = () => {
           </div>
 
           <div className="space-y-3">
-            {recentResults.map((result, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-3 rounded-lg border hover:border-blue-500 cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="bg-green-100 p-2 rounded-lg">
-                    <FileText size={20} className="text-green-600" />
+            {recentResults.length > 0 ? (
+              recentResults.map((result, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-3 rounded-lg border hover:border-blue-500 cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="bg-green-100 p-2 rounded-lg">
+                      <FileText size={20} className="text-green-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-800">
+                        {result.test}
+                      </h3>
+                      <p className="text-sm text-gray-600">{result.date}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-medium text-gray-800">{result.test}</h3>
-                    <p className="text-sm text-gray-600">{result.date}</p>
-                  </div>
+                  <span className="text-sm font-medium text-green-600">
+                    {result.status}
+                  </span>
                 </div>
-                <span className="text-sm font-medium text-green-600">
-                  {result.status}
-                </span>
+              ))
+            ) : (
+              <div className="text-center text-gray-500">
+                No recent test results
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>

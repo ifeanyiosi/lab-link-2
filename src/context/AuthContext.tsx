@@ -17,6 +17,7 @@ export interface UserDetails {
   firstName: string;
   lastName: string;
   phone: string;
+  labName: string;
 }
 
 interface AuthContextProps {

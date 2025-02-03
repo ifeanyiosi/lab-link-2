@@ -135,12 +135,12 @@ const AvailableLabs = () => {
                 <strong>Address:</strong> {lab.address}
               </p>
               <p className="text-sm text-gray-600">
-                <strong>Operating Hours:</strong>{" "}
-                {lab.operatingHours.openingTime} -{" "}
+                <strong>Operating Hours:</strong>
+                {lab.operatingHours.openingTime} -
                 {lab.operatingHours.closingTime}
               </p>
               <p className="text-sm text-gray-600">
-                <strong>Services:</strong>{" "}
+                <strong>Services:</strong>
                 {lab.services.length > 0
                   ? lab.services.join(", ")
                   : "No services listed"}

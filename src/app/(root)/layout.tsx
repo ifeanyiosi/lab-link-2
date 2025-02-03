@@ -20,7 +20,7 @@ export default function HomeLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body suppressHydrationWarning className={inter.className}>
         <AuthProvider>
           <HomeHeader />
           <div className="min-h-screen">{children}</div> <Footer /> <Toaster />

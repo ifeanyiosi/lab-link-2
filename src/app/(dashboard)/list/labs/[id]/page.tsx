@@ -37,7 +37,6 @@ const SingleLabPage = ({ params }: LabDetailsProps) => {
             <div className="w-2/3 flex flex-col justify-between gap-4">
               <div className="flex items-center gap-4">
                 <h1 className="text-xl font-semibold">{labs?.name}</h1>
-               
               </div>
               <p className="text-sm text-gray-500">{labs?.location}</p>
               <div className="flex items-center  gap-2 flex-wrap text-xs font-medium">
@@ -48,7 +47,6 @@ const SingleLabPage = ({ params }: LabDetailsProps) => {
 
                 <div className="w-full flex items-center flex-col gap-2">
                   <div className="w-full  flex items-center gap-2">
-                    {" "}
                     <Image src="/phone.png" alt="" width={14} height={14} />
                     <span>{labs?.phone}</span>
                   </div>

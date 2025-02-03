@@ -158,7 +158,7 @@ const Menu = () => {
             className="h-[20px] w-[20px] "
             src="/logout.png"
             alt="logout button"
-          />{" "}
+          />
           <span className="">Logout</span>
         </button>
       </div>

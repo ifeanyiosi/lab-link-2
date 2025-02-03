@@ -138,10 +138,10 @@ const LabSignupPage = () => {
     } catch (err) {
       setError("Error: " + (err as Error).message);
       toast.error("Invalid email or password. Please try again.", {
-              position: "top-right",
-              autoClose: 2000,
-              theme: "dark",
-            });
+        position: "top-right",
+        autoClose: 2000,
+        theme: "dark",
+      });
     } finally {
       setLoading(false);
     }
@@ -408,7 +408,6 @@ const LabSignupPage = () => {
                     )}
                   />
                   <div className="flex flex-col md:flex-row gap-4 w-full items-start  ">
-                    {" "}
                     <FormField
                       control={form.control}
                       name="operatingHours.openingTime"
