@@ -23,6 +23,8 @@ import {
   Loader2,
 } from "lucide-react";
 import { db } from "@/firebase/firebaseConfig";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 interface Appointment {
   date: string;
@@ -32,10 +34,12 @@ interface Appointment {
   status: string;
 }
 
-interface TestResult {
+interface Result {
+  labName: string;
+  tests: string[];
   date: string;
-  test: string;
-  status: string;
+  resultPdfUrl: string;
+  uploadedAt: Date;
 }
 
 const PatientDashboard: React.FC = () => {
@@ -43,7 +47,7 @@ const PatientDashboard: React.FC = () => {
   const router = useRouter();
   const [upcomingAppointment, setUpcomingAppointment] =
     useState<Appointment | null>(null);
-  const [recentResults, setRecentResults] = useState<TestResult[]>([]);
+  const [results, setResults] = useState<Result[]>([]);
 
   const quickActions = [
     {
@@ -111,25 +115,15 @@ const PatientDashboard: React.FC = () => {
       setUpcomingAppointment(sortedAppointments[0] || null);
 
       // Fetch recent test results
-      const resultsRef = collection(db, "test-results");
-      const resultsQuery = query(resultsRef, where("userId", "==", user.uid));
+      const resultsRef = collection(db, "users", user.uid, "results");
+      const snapshot = await getDocs(resultsRef);
+      const fetchedResults = snapshot.docs.map((doc) => doc.data() as Result);
 
-      const resultsSnapshot = await getDocs(resultsQuery);
-      const results = resultsSnapshot.docs.map(
-        (doc) =>
-          ({
-            date: doc.data().date,
-            test: doc.data().test,
-            status: doc.data().status,
-          } as TestResult)
+      // Sort results by most recent first
+      fetchedResults.sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
       );
-
-      // Sort results by most recent
-      const sortedResults = results
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .slice(0, 2);
-
-      setRecentResults(sortedResults);
+      setResults(fetchedResults);
     };
 
     fetchAppointmentsAndResults();
@@ -153,9 +147,11 @@ const PatientDashboard: React.FC = () => {
               Here&apos;s what&apos;s happening with your health monitoring
             </p>
           </div>
-          <button className="p-2 rounded-full bg-gray-50 hover:bg-gray-100 transition-colors">
-            <Bell size={20} className="text-gray-600" />
-          </button>
+          <Button asChild>
+            <Link href={"/patient/appointment/create-appointment"}>
+              Make an appointment
+            </Link>
+          </Button>
         </div>
 
         {/* Quick Actions Grid */}
@@ -256,8 +252,8 @@ const PatientDashboard: React.FC = () => {
           </div>
 
           <div className="space-y-3">
-            {recentResults.length > 0 ? (
-              recentResults.map((result, index) => (
+            {results.length > 0 ? (
+              results.slice(-1).map((result, index) => (
                 <div
                   key={index}
                   className="flex items-center justify-between p-3 rounded-lg border hover:border-blue-500 cursor-pointer"
@@ -267,15 +263,15 @@ const PatientDashboard: React.FC = () => {
                       <FileText size={20} className="text-green-600" />
                     </div>
                     <div>
+                      <h1 className=" font-medium text-green-600">
+                        {result.labName}
+                      </h1>
                       <h3 className="font-medium text-gray-800">
-                        {result.test}
+                        {result.tests}
                       </h3>
                       <p className="text-sm text-gray-600">{result.date}</p>
                     </div>
                   </div>
-                  <span className="text-sm font-medium text-green-600">
-                    {result.status}
-                  </span>
                 </div>
               ))
             ) : (

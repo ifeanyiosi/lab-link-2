@@ -5,8 +5,8 @@ import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
 import Link from "next/link";
 import { Menu as MenuIcon, X } from "lucide-react";
-import RightSidebar from "@/components/RightSidebar";
 import { useRouter } from "next/navigation";
+import LabRightSidebar from "@/components/LabRightSidebar";
 
 interface MenuItem {
   icon: string;
@@ -61,7 +61,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         },
         {
           icon: "/time.png",
-          label: "My Appointments",
+          label: "Appointments",
           href: "/lab/appointments",
           visible: ["lab"],
         },
@@ -71,30 +71,30 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           href: "/lab/test-orders",
           visible: ["lab"],
         },
-        {
-          icon: "/result.png",
-          label: "Results Processing",
-          href: "/lab/results-processing",
-          visible: ["lab"],
-        },
-        {
-          icon: "/inventory.png",
-          label: "Inventory Management",
-          href: "/lab/inventory-management",
-          visible: ["lab"],
-        },
-        {
-          icon: "/messages.png",
-          label: "Messages",
-          href: "/lab/messages",
-          visible: ["lab"],
-        },
-        {
-          icon: "/settings.png",
-          label: "Settings",
-          href: "/settings",
-          visible: ["lab"],
-        },
+        // {
+        //   icon: "/result.png",
+        //   label: "Results Processing",
+        //   href: "/lab/results-processing",
+        //   visible: ["lab"],
+        // },
+        // {
+        //   icon: "/inventory.png",
+        //   label: "Inventory Management",
+        //   href: "/lab/inventory-management",
+        //   visible: ["lab"],
+        // },
+        // {
+        //   icon: "/messages.png",
+        //   label: "Messages",
+        //   href: "/lab/messages",
+        //   visible: ["lab"],
+        // },
+        // {
+        //   icon: "/settings.png",
+        //   label: "Settings",
+        //   href: "/settings",
+        //   visible: ["lab"],
+        // },
       ],
     },
     {
@@ -215,7 +215,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               <div className="flex-1 overflow-y-auto">{children}</div>
               {/* Right sidebar component */}
               <div className="w-full lg:w-1/3">
-                <RightSidebar />
+                <LabRightSidebar />
               </div>
             </div>
           </div>

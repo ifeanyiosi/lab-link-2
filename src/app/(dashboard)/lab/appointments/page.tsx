@@ -8,6 +8,7 @@ import {
   getDocs,
   updateDoc,
   doc,
+  setDoc,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "@/firebase/firebaseConfig";
@@ -99,6 +100,9 @@ export default function AppointmentsDashboard() {
     indexOfFirstItem,
     indexOfLastItem
   );
+  const [uploadingAppointments, setUploadingAppointments] = useState<{
+    [key: string]: boolean;
+  }>({});
 
   useEffect(() => {
     setCurrentPage(1);
@@ -206,22 +210,45 @@ export default function AppointmentsDashboard() {
     if (!file) return;
 
     setFileUploadError("");
-    setIsUploading(true);
+    setUploadingAppointments((prev) => ({ ...prev, [appointmentId]: true }));
 
     try {
       if (!appointmentId || !user?.uid)
         throw new Error("Missing required identifiers");
 
+      // Find the appointment data
+      const appointment = appointments.find((app) => app.id === appointmentId);
+      if (!appointment) throw new Error("Appointment not found");
+
+      // Upload PDF to storage
       const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
       const storagePath = `results/${user.uid}/${appointmentId}/${sanitizedFileName}`;
-
       const storageRef = ref(storage, storagePath);
       const snapshot = await uploadBytes(storageRef, file);
       const downloadURL = await getDownloadURL(snapshot.ref);
 
+      // Update appointment with PDF URL
       const appointmentRef = doc(db, "appointments", appointmentId);
       await updateDoc(appointmentRef, { resultPdfUrl: downloadURL });
 
+      // Add to user's results collection
+      const userId = appointment.userId;
+      const resultDocRef = doc(db, "users", userId, "results", appointmentId);
+
+      await setDoc(
+        resultDocRef,
+        {
+          labName: appointment.labName,
+          tests: appointment.tests,
+          date: appointment.date,
+          resultPdfUrl: downloadURL,
+          uploadedAt: new Date(),
+          appointmentId: appointmentId,
+        },
+        { merge: true }
+      );
+
+      // Update local state
       setAppointments((prev) =>
         prev.map((app) =>
           app.id === appointmentId ? { ...app, resultPdfUrl: downloadURL } : app
@@ -233,7 +260,7 @@ export default function AppointmentsDashboard() {
         error instanceof Error ? error.message : "Failed to upload PDF"
       );
     } finally {
-      setIsUploading(false);
+      setUploadingAppointments((prev) => ({ ...prev, [appointmentId]: false }));
     }
   };
 
@@ -469,9 +496,14 @@ export default function AppointmentsDashboard() {
                                 size="sm"
                                 variant="outline"
                                 className="border-blue-500 text-blue-600 hover:bg-blue-50 relative"
-                                disabled={isUploading}
+                                disabled={
+                                  appointment?.id
+                                    ? uploadingAppointments[appointment.id]
+                                    : false
+                                }
                               >
-                                {isUploading ? (
+                                {appointment?.id &&
+                                uploadingAppointments[appointment.id] ? (
                                   <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     Uploading...
