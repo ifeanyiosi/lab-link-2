@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,14 +8,15 @@ import {
   FileText,
   ShieldCheck,
 } from "lucide-react";
+import Link from "next/link";
 
 const LabLinkLandingPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+    <div className=" bg-gradient-to-br from-blue-50 to-white">
       {/* Navigation */}
 
       {/* Hero Section */}
-      <main className="container mx-auto px-4 py-16 grid md:grid-cols-2 gap-12 items-center">
+      <main className="container mx-auto min-h-screen px-4 py-16 grid md:grid-cols-2 gap-12 items-center">
         <div>
           <h1 className="text-5xl font-extrabold text-blue-900 mb-6 leading-tight">
             Your Health, <br />
@@ -25,11 +27,11 @@ const LabLinkLandingPage: React.FC = () => {
             seamlessly.
           </p>
           <div className="flex space-x-4">
-            <Button size="lg" className="bg-primary hover:bg-blue-700">
-              Book a Test
+            <Button asChild size="lg" className="bg-primary hover:bg-blue-700">
+              <Link href={"/sign-in"}>Book a Test</Link>
             </Button>
-            <Button size="lg" variant="outline">
-              Learn More
+            <Button asChild size="lg" variant="outline">
+              <Link href={"#about"}>Learn more</Link>
             </Button>
           </div>
         </div>
@@ -43,7 +45,10 @@ const LabLinkLandingPage: React.FC = () => {
       </main>
 
       {/* Features Section */}
-      <section className="container mx-auto py-16 px-4">
+      <section
+        id="#about"
+        className="container mx-auto min-h-screen py-16 px-4"
+      >
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-blue-900 mb-4">
             Why Choose Lab Link

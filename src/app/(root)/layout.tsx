@@ -13,17 +13,17 @@ export const metadata: Metadata = {
   description: "Next.js Appointment Application",
 };
 
-export default function HomeLayout({
+export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
       <body suppressHydrationWarning className={inter.className}>
         <AuthProvider>
           <HomeHeader />
-          <div className="min-h-screen">{children}</div> <Footer /> <Toaster />
+          <main className="min-h-screen">{children}</main>
+          <Footer />
+          <Toaster />
         </AuthProvider>
       </body>
     </html>
