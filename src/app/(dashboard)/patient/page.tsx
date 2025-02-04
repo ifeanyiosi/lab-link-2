@@ -71,13 +71,13 @@ const PatientDashboard: React.FC = () => {
       href: "/list/labs",
       color: "bg-purple-100 text-purple-600",
     },
-    {
-      icon: Activity,
-      title: "Health Records",
-      description: "View medical history",
-      href: "/patient/records",
-      color: "bg-orange-100 text-orange-600",
-    },
+    // {
+    //   icon: Activity,
+    //   title: "Health Records",
+    //   description: "View medical history",
+    //   href: "/patient/records",
+    //   color: "bg-orange-100 text-orange-600",
+    // },
   ];
 
   useEffect(() => {
@@ -138,7 +138,7 @@ const PatientDashboard: React.FC = () => {
     <div className="space-y-6">
       {/* Welcome Section */}
       <div className="bg-white rounded-xl shadow-sm p-6">
-        <div className="flex justify-between items-start mb-6">
+        <div className="flex flex-col lg:flex-row gap-4 justify-between items-start mb-6">
           <div>
             <h1 className="text-2xl font-semibold text-gray-800">
               Welcome back, {user.firstName}
@@ -155,7 +155,7 @@ const PatientDashboard: React.FC = () => {
         </div>
 
         {/* Quick Actions Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           {quickActions.map((action) => (
             <button
               key={action.title}
