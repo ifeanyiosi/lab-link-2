@@ -1,15 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, Timestamp } from "firebase/firestore";
 import { db } from "@/firebase/firebaseConfig";
 import { useAuth } from "@/context/AuthContext";
 import { FileText, Download } from "lucide-react";
 
 interface Result {
+  id: string;
   labName: string;
-  tests: string[];
-  date: string;
+  tests: Array<{
+    name: string;
+    price: number;
+  }>;
+  date: Date;
   resultPdfUrl: string;
   uploadedAt: Date;
 }
@@ -18,24 +22,56 @@ export default function ResultsHistory() {
   const { user } = useAuth();
   const [results, setResults] = useState<Result[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchResults = async () => {
       try {
+        setIsLoading(true);
+        setError(null);
+
         if (!user?.uid) return;
 
         const resultsRef = collection(db, "users", user.uid, "results");
         const snapshot = await getDocs(resultsRef);
-        const fetchedResults = snapshot.docs.map((doc) => doc.data() as Result);
 
-        // Sort results by most recent first
-        fetchedResults.sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        const convertToDate = (dateValue: any): Date => {
+          if (dateValue instanceof Timestamp) {
+            return dateValue.toDate();
+          }
+          if (typeof dateValue === "string") {
+            return new Date(dateValue);
+          }
+          if (dateValue?.toDate) {
+            // Handle legacy Firebase formats
+            return dateValue.toDate();
+          }
+          return dateValue;
+        };
+
+        const fetchedResults = snapshot.docs.map(
+          (doc) =>
+            ({
+              id: doc.id,
+              labName: doc.data().labName,
+              tests: doc.data().tests,
+              date: convertToDate(doc.data().date),
+              resultPdfUrl: doc.data().resultPdfUrl,
+              uploadedAt: convertToDate(doc.data().uploadedAt),
+            } as Result)
         );
+
+        // Safe sorting with Date validation
+        fetchedResults.sort((a, b) => {
+          const dateA = a.date instanceof Date ? a.date : new Date(a.date);
+          const dateB = b.date instanceof Date ? b.date : new Date(b.date);
+          return dateB.getTime() - dateA.getTime();
+        });
 
         setResults(fetchedResults);
       } catch (error) {
         console.error("Error fetching results:", error);
+        setError("Failed to load results. Please try again later.");
       } finally {
         setIsLoading(false);
       }
@@ -52,6 +88,14 @@ export default function ResultsHistory() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="text-center text-red-500 p-8">
+        <p>{error}</p>
+      </div>
+    );
+  }
+
   if (results.length === 0) {
     return (
       <div className="text-center text-gray-500 p-8">
@@ -63,10 +107,10 @@ export default function ResultsHistory() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
-      {results.map((result, index) => (
+      {results.map((result) => (
         <div
-          key={index}
-          className="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-105 transform"
+          key={result.id}
+          className="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl"
         >
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
@@ -77,7 +121,7 @@ export default function ResultsHistory() {
             </div>
 
             <p className="text-sm text-gray-500 mb-4">
-              {new Date(result.date).toLocaleDateString("en-US", {
+              {result.date.toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "long",
                 day: "numeric",
@@ -85,12 +129,12 @@ export default function ResultsHistory() {
             </p>
 
             <div className="flex flex-wrap gap-2 mb-4">
-              {result.tests.map((test, i) => (
+              {result.tests.map((test, index) => (
                 <span
-                  key={i}
+                  key={index}
                   className="bg-blue-50 text-blue-600 px-2 py-1 rounded-full text-xs"
                 >
-                  {test}
+                  {test.name}
                 </span>
               ))}
             </div>

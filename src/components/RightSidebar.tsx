@@ -18,19 +18,25 @@ import { formatDistanceToNow, isValid } from "date-fns";
 
 interface Appointment {
   id: string;
-  date: string;
+  date: Timestamp;
   time: string;
   status: "pending" | "confirmed" | "completed" | "canceled";
-  tests: string[];
+  tests: Array<{
+    name: string;
+    price: number;
+  }>;
   labName: string;
   userId: string;
 }
 
 interface Result {
-  date: string;
-  tests: string[];
+  date: Timestamp;
+  tests: Array<{
+    name: string;
+    price: number;
+  }>;
   labName: string;
-  uploadedAt: Date | Timestamp;
+  uploadedAt: Timestamp;
 }
 
 const RightSidebar = () => {
@@ -43,6 +49,15 @@ const RightSidebar = () => {
     nextAppointment: "",
   });
   const [loading, setLoading] = useState(true);
+
+  const convertTimestamp = (timestamp: Timestamp) => {
+    try {
+      return timestamp.toDate();
+    } catch (error) {
+      console.error("Error converting timestamp:", error);
+      return new Date();
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,8 +73,14 @@ const RightSidebar = () => {
           orderBy("date")
         );
         const appointmentsSnapshot = await getDocs(appointmentsQuery);
+
         const userAppointments = appointmentsSnapshot.docs.map(
-          (doc) => ({ ...doc.data(), id: doc.id } as Appointment)
+          (doc) =>
+            ({
+              ...doc.data(),
+              id: doc.id,
+              date: doc.data().date as Timestamp,
+            } as Appointment)
         );
 
         // Fetch latest test result
@@ -76,20 +97,28 @@ const RightSidebar = () => {
 
         // Build notifications
         const newNotifications = [];
+        const now = new Date();
 
         // Find first upcoming appointment
-        const firstUpcomingAppointment = userAppointments.find((apt) =>
-          ["pending", "confirmed"].includes(apt.status)
-        );
+        const firstUpcomingAppointment = userAppointments.find((apt) => {
+          const appointmentDate = convertTimestamp(apt.date);
+          return (
+            ["pending", "confirmed"].includes(apt.status) &&
+            appointmentDate > now
+          );
+        });
 
         if (firstUpcomingAppointment) {
-          const appointmentDate = new Date(firstUpcomingAppointment.date);
+          const appointmentDate = convertTimestamp(
+            firstUpcomingAppointment.date
+          );
           if (isValid(appointmentDate)) {
             newNotifications.push({
               type: "appointment",
-              message: `Upcoming ${firstUpcomingAppointment.tests.join(
-                ", "
-              )} at ${firstUpcomingAppointment.labName}`,
+              message: `Upcoming ${firstUpcomingAppointment.tests
+                .map((t) => t.name)
+                .join(", ")} 
+                       at ${firstUpcomingAppointment.labName}`,
               time: formatDistanceToNow(appointmentDate, { addSuffix: true }),
               icon: Calendar,
               status:
@@ -97,32 +126,20 @@ const RightSidebar = () => {
                   ? "warning"
                   : "success",
             });
-          } else {
-            console.error(
-              "Invalid appointment date:",
-              firstUpcomingAppointment.date
-            );
           }
         }
 
         if (firstResult?.uploadedAt) {
-          const uploadedAtDate =
-            firstResult.uploadedAt instanceof Timestamp
-              ? firstResult.uploadedAt.toDate()
-              : new Date(firstResult.uploadedAt);
-
+          const uploadedAtDate = convertTimestamp(firstResult.uploadedAt);
           if (isValid(uploadedAtDate)) {
             newNotifications.push({
               type: "result",
-              message: `New ${firstResult.tests.join(
-                ", "
-              )} results available from ${firstResult.labName}`,
+              message: `New ${firstResult.tests.map((t) => t.name).join(", ")} 
+                       results available from ${firstResult.labName}`,
               time: formatDistanceToNow(uploadedAtDate, { addSuffix: true }),
               icon: FileText,
               status: "success",
             });
-          } else {
-            console.error("Invalid uploadedAt date:", firstResult.uploadedAt);
           }
         }
 
@@ -135,7 +152,9 @@ const RightSidebar = () => {
         }
 
         if (
-          !userAppointments.some((apt) => apt.tests.includes("Physical Exam"))
+          !userAppointments.some((apt) =>
+            apt.tests.some((test) => test.name === "Physical Exam")
+          )
         ) {
           reminders.push("Schedule annual physical examination");
         }
@@ -154,7 +173,9 @@ const RightSidebar = () => {
           completedTests: completedAppointments.length,
           pendingResults: pendingAppointments.length,
           nextAppointment: firstUpcomingAppointment?.date
-            ? new Date(firstUpcomingAppointment.date).toLocaleDateString()
+            ? convertTimestamp(
+                firstUpcomingAppointment.date
+              ).toLocaleDateString()
             : "No upcoming appointments",
         });
       } catch (error) {

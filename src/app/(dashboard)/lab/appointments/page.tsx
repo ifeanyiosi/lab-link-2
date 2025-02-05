@@ -30,8 +30,6 @@ import {
   Loader2,
 } from "lucide-react";
 
-
-
 interface Appointment {
   id?: string;
 

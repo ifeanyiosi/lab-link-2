@@ -30,7 +30,10 @@ export interface Appointment {
   labId: string;
   date: string;
   time: string;
-  tests: string[];
+  tests: Array<{
+    name: string;
+    price: number;
+  }>;
   status: "pending" | "confirmed" | "completed" | "canceled";
   notes?: string;
   labName: string;
@@ -426,10 +429,10 @@ export default function PatientDashboard() {
                               <div className="flex flex-wrap gap-2">
                                 {appointment.tests.map((test) => (
                                   <span
-                                    key={test}
+                                    key={test.name}
                                     className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-sm"
                                   >
-                                    {test}
+                                    {test?.name}
                                   </span>
                                 ))}
                               </div>

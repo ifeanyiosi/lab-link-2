@@ -10,33 +10,36 @@ import {
   getDocs,
   Timestamp,
 } from "firebase/firestore";
-
 import {
   Calendar,
   Clock,
   FileText,
   Building2,
-  Activity,
   Plus,
   ChevronRight,
-  Bell,
-  Loader2,
 } from "lucide-react";
 import { db } from "@/firebase/firebaseConfig";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 interface Appointment {
+  id: string;
   date: string;
   time: string;
   labName: string;
-  tests: string[];
+  tests: Array<{
+    name: string;
+    price: number;
+  }>;
   status: string;
 }
 
 interface Result {
   labName: string;
-  tests: string[];
+  tests: Array<{
+    name: string;
+    price: number;
+  }>;
   date: string;
   resultPdfUrl: string;
   uploadedAt: Date;
@@ -71,13 +74,6 @@ const PatientDashboard: React.FC = () => {
       href: "/list/labs",
       color: "bg-purple-100 text-purple-600",
     },
-    // {
-    //   icon: Activity,
-    //   title: "Health Records",
-    //   description: "View medical history",
-    //   href: "/patient/records",
-    //   color: "bg-orange-100 text-orange-600",
-    // },
   ];
 
   useEffect(() => {
@@ -93,20 +89,24 @@ const PatientDashboard: React.FC = () => {
       );
 
       const appointmentsSnapshot = await getDocs(appointmentsQuery);
-      const appointments = appointmentsSnapshot.docs.map(
-        (doc) =>
-          ({
-            id: doc.id,
-            ...doc.data(),
-            date: doc.data().date,
-            time: doc.data().time,
-            labName: doc.data().labName,
-            tests: doc.data().tests,
-            status: doc.data().status,
-          } as Appointment)
-      );
+      const appointments = appointmentsSnapshot.docs.map((doc) => {
+        const data = doc.data();
+        const date =
+          data.date instanceof Timestamp
+            ? data.date.toDate().toISOString().split("T")[0]
+            : data.date;
 
-      // Sort and take the earliest appointment
+        return {
+          id: doc.id,
+          ...data,
+          date,
+          time: data.time,
+          labName: data.labName,
+          tests: data.tests,
+          status: data.status,
+        } as Appointment;
+      });
+
       const sortedAppointments = appointments.sort(
         (a, b) =>
           new Date(`${a.date} ${a.time}`).getTime() -
@@ -117,9 +117,23 @@ const PatientDashboard: React.FC = () => {
       // Fetch recent test results
       const resultsRef = collection(db, "users", user.uid, "results");
       const snapshot = await getDocs(resultsRef);
-      const fetchedResults = snapshot.docs.map((doc) => doc.data() as Result);
+      const fetchedResults = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        const date =
+          data.date instanceof Timestamp
+            ? data.date.toDate().toISOString().split("T")[0]
+            : data.date;
 
-      // Sort results by most recent first
+        return {
+          ...data,
+          date,
+          uploadedAt:
+            data.uploadedAt instanceof Timestamp
+              ? data.uploadedAt.toDate()
+              : data.uploadedAt,
+        } as Result;
+      });
+
       fetchedResults.sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
       );
@@ -148,7 +162,7 @@ const PatientDashboard: React.FC = () => {
             </p>
           </div>
           <Button asChild>
-            <Link href={"/patient/appointment/create-appointment"}>
+            <Link href="/patient/appointment/create-appointment">
               Make an appointment
             </Link>
           </Button>
@@ -157,9 +171,9 @@ const PatientDashboard: React.FC = () => {
         {/* Quick Actions Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           {quickActions.map((action) => (
-            <button
+            <Link
               key={action.title}
-              onClick={() => router.push(action.href)}
+              href={action.href}
               className="p-4 rounded-xl bg-white border hover:border-blue-500 transition-all duration-200 text-left group"
             >
               <div className={`${action.color} p-2 rounded-lg w-fit`}>
@@ -169,7 +183,7 @@ const PatientDashboard: React.FC = () => {
                 {action.title}
               </h3>
               <p className="text-sm text-gray-600 mt-1">{action.description}</p>
-            </button>
+            </Link>
           ))}
         </div>
       </div>
@@ -203,7 +217,9 @@ const PatientDashboard: React.FC = () => {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-medium text-gray-800">
-                    {upcomingAppointment.tests?.join(", ")}
+                    {upcomingAppointment.tests
+                      ?.map((test) => test.name)
+                      .join(", ")}
                   </h3>
                   <p className="text-sm text-gray-600 mt-1">
                     {upcomingAppointment.labName}
@@ -253,21 +269,22 @@ const PatientDashboard: React.FC = () => {
 
           <div className="space-y-3">
             {results.length > 0 ? (
-              results.slice(-1).map((result, index) => (
+              results.slice(0, 1).map((result, index) => (
                 <div
                   key={index}
                   className="flex items-center justify-between p-3 rounded-lg border hover:border-blue-500 cursor-pointer"
+                  onClick={() => window.open(result.resultPdfUrl, "_blank")}
                 >
                   <div className="flex items-center gap-3">
                     <div className="bg-green-100 p-2 rounded-lg">
                       <FileText size={20} className="text-green-600" />
                     </div>
                     <div>
-                      <h1 className=" font-medium text-green-600">
+                      <h1 className="font-medium text-green-600">
                         {result.labName}
                       </h1>
                       <h3 className="font-medium text-gray-800">
-                        {result.tests}
+                        {result.tests.map((test) => test.name).join(", ")}
                       </h3>
                       <p className="text-sm text-gray-600">{result.date}</p>
                     </div>
@@ -275,7 +292,7 @@ const PatientDashboard: React.FC = () => {
                 </div>
               ))
             ) : (
-              <div className="text-center text-gray-500">
+              <div className="text-center text-gray-500 py-4">
                 No recent test results
               </div>
             )}
