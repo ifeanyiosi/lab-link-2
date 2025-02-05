@@ -5,8 +5,10 @@ import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
 import Link from "next/link";
 import { Menu as MenuIcon, X } from "lucide-react";
+import EventCalendar from "@/components/EventCalendar";
+import Announcements from "@/components/Announcements";
+import RightSidebar from "@/components/RightSidebar";
 import { useRouter } from "next/navigation";
-import LabRightSidebar from "@/components/LabRightSidebar";
 
 interface MenuItem {
   icon: string;
@@ -30,7 +32,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { user, loading, logout } = useAuth();
   const role = user?.role || "";
 
-  // If the user is not logged in, redirect to the sign-in page.
   useEffect(() => {
     if (!loading && !user) {
       router.replace("/sign-in");
@@ -49,52 +50,51 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     return null; // Return null while redirecting
   }
 
-  // Define Lab-specific menu items.
-  const labMenuItems: MenuSection[] = [
+  const menuItems: MenuSection[] = [
     {
       items: [
         {
-          icon: "/home.png",
-          label: "Home",
-          href: "/lab",
-          visible: ["lab"],
+          icon: "/dashboard.png",
+          label: "Dashboard",
+          href: "/admin",
+          visible: ["admin"],
         },
         {
-          icon: "/time.png",
+          icon: "/users.png",
+          label: "Manage Users",
+          href: "/admin/users",
+          visible: ["admin"],
+        },
+        {
+          icon: "/calendar.png",
           label: "Appointments",
-          href: "/lab/appointments",
-          visible: ["lab"],
+          href: "/admin/appointments",
+          visible: ["admin"],
         },
         {
           icon: "/beaker.png",
           label: "Test Orders",
-          href: "/lab/test-orders",
-          visible: ["lab"],
+          href: "/admin/test-orders",
+          visible: ["admin"],
         },
-        // {
-        //   icon: "/result.png",
-        //   label: "Results Processing",
-        //   href: "/lab/results-processing",
-        //   visible: ["lab"],
-        // },
-        // {
-        //   icon: "/inventory.png",
-        //   label: "Inventory Management",
-        //   href: "/lab/inventory-management",
-        //   visible: ["lab"],
-        // },
-        // {
-        //   icon: "/messages.png",
-        //   label: "Messages",
-        //   href: "/lab/messages",
-        //   visible: ["lab"],
-        // },
-        // {
-        //   icon: "/settings.png",
-        //   label: "Settings",
-        //   href: "/settings",
-        //   visible: ["lab"],
-        // },
+        {
+          icon: "/anat.png",
+          label: "Announcements",
+          href: "/admin/announcements",
+          visible: ["admin"],
+        },
+        {
+          icon: "/anat.png",
+          label: "Analytics",
+          href: "/admin/analytics",
+          visible: ["admin"],
+        },
+        {
+          icon: "/settings.png",
+          label: "Settings",
+          href: "/settings",
+          visible: ["admin", "doctor", "patient", "lab"],
+        },
       ],
     },
     {
@@ -103,19 +103,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         {
           icon: "/faq.png",
           label: "Support & FAQs",
-          href: "/lab/support",
-          visible: ["lab"],
+          href: "/profile",
+          visible: ["admin", "doctor", "patient", "lab"],
         },
       ],
     },
   ];
 
-  // Use the lab-specific menu items if the user's role is lab.
-  const menuItems = role === "lab" ? labMenuItems : [];
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row overflow-hidden">
-      {/* Mobile Header */}
+      {/* Mobile Header - Fixed */}
       <div className="lg:hidden fixed top-0 left-0 right-0 bg-white z-50 px-4 py-3 flex items-center justify-between shadow-sm">
         <button
           onClick={() => setSidebarOpen(!isSidebarOpen)}
@@ -126,17 +124,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         <Link href="/" className="flex items-center gap-2">
           <Image
             src="/icons/lab-link-logo.png"
-            alt="Lablink logo"
+            alt="logo"
             width={24}
             height={24}
             className="w-6 h-6"
           />
           <span className="font-bold text-lg">Lablink</span>
         </Link>
-        <div className="w-10" /> {/* Spacer */}
+        <div className="w-10" /> {/* Spacer for balance */}
       </div>
 
-      {/* Sidebar */}
+      {/* Sidebar - Fixed for desktop, absolute for mobile */}
       <aside
         className={`fixed lg:sticky top-0 left-0 h-full bg-white z-40 
           transition-transform duration-300 ease-in-out
@@ -144,11 +142,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           lg:translate-x-0 w-64 lg:w-[16%] xl:w-[14%] shadow-lg lg:shadow-none
           flex flex-col`}
       >
-        {/* Desktop Logo */}
+        {/* Logo section - desktop only */}
         <div className="hidden lg:flex items-center gap-2 p-4 border-b">
           <Image
             src="/icons/lab-link-logo.png"
-            alt="Lablink logo"
+            alt="logo"
             width={24}
             height={24}
             className="w-6 h-6"
@@ -156,7 +154,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <span className="font-bold text-lg">Lablink</span>
         </div>
 
-        {/* Menu */}
+        {/* Scrollable menu area */}
         <div className="flex-1 overflow-y-auto pt-16 lg:pt-0">
           {menuItems.map((section, idx) => (
             <div key={section.title || idx} className="flex flex-col py-4">
@@ -189,7 +187,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           ))}
         </div>
 
-        {/* Logout */}
+        {/* Logout button - fixed at bottom */}
         <div className="p-4 border-t mt-auto">
           <button
             onClick={logout}
@@ -197,7 +195,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           >
             <Image
               src="/logout.png"
-              alt="Logout"
+              alt="logout"
               width={20}
               height={20}
               className="w-5 h-5"
@@ -207,18 +205,24 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </div>
       </aside>
 
-      {/* Main Content */}
+      {/* Main content area */}
       <main className="flex-1 lg:flex overflow-hidden h-screen pt-14 lg:pt-0 bg-[#F7F8FA]">
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-[1920px] mx-auto p-4 lg:p-6">
             <div className="flex flex-col lg:flex-row gap-6">
+              {/* Main content */}
               <div className="flex-1 overflow-y-auto">{children}</div>
+
+              {/* Right sidebar */}
+              <div className="w-full lg:w-1/3 ">
+                <RightSidebar />
+              </div>
             </div>
           </div>
         </div>
       </main>
 
-      {/* Mobile Overlay */}
+      {/* Mobile overlay */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"

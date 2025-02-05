@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ToastContainer } from "react-toastify";
+import dynamic from "next/dynamic";
 import { AuthProvider } from "@/context/AuthContext";
-import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -12,6 +11,12 @@ export const metadata: Metadata = {
   description: "Next.js Appointment Application",
 };
 
+// Client-side only components
+const ClientSideComponents = dynamic(
+  () => import("@/components/ClientSideComponents"),
+  { ssr: false }
+);
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -19,9 +24,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body suppressHydrationWarning className={inter.className}>
+      <body className={inter.className}>
         <AuthProvider>
-          {children} <Analytics /> <ToastContainer />
+          {children}
+          <ClientSideComponents />
         </AuthProvider>
       </body>
     </html>

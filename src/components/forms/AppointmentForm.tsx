@@ -19,6 +19,19 @@ import {
   Beaker,
 } from "lucide-react";
 
+export interface LabService {
+  id: string;
+  name: string;
+  description: string;
+  labPrice: number;
+  details: {
+    sampleType: string;
+    collectionMethod: string;
+    resultsTimeframe: string;
+    preparation: string;
+  };
+}
+
 export interface Lab {
   id: string;
   email: string;
@@ -29,7 +42,7 @@ export interface Lab {
     openingTime: string;
     closingTime: string;
   };
-  services: string[];
+  services: LabService[];
   state: string;
   town: string;
 }
@@ -39,7 +52,10 @@ export interface Appointment {
   labId: string;
   date: string;
   time: string;
-  tests: string[];
+  tests: Array<{
+    name: string;
+    price: number;
+  }>;
   status: "pending" | "confirmed" | "completed" | "canceled";
   notes?: string;
   labName: string;
@@ -88,9 +104,25 @@ export default function AppointmentForm() {
 
       const querySnapshot = await getDocs(q);
       const labsData: Lab[] = [];
-      querySnapshot.forEach((doc) => {
-        labsData.push({ id: doc.id, ...doc.data() } as Lab);
-      });
+
+      for (const doc of querySnapshot.docs) {
+        const labData = doc.data() as Omit<Lab, "id" | "services">;
+        const servicesCol = collection(db, "users", doc.id, "lab-services");
+        const servicesSnapshot = await getDocs(servicesCol);
+        console.log("Fetching services for lab:", doc.id);
+        console.log("Services snapshot size:", servicesSnapshot.size);
+
+        const services = servicesSnapshot.docs.map((serviceDoc) => ({
+          id: serviceDoc.id,
+          ...serviceDoc.data(),
+        })) as LabService[];
+
+        labsData.push({
+          id: doc.id,
+          ...labData,
+          services: services,
+        });
+      }
 
       setLabs(labsData);
       if (labsData.length === 0) {
@@ -118,7 +150,13 @@ export default function AppointmentForm() {
         labId: selectedLab.id,
         date,
         time,
-        tests: selectedTests,
+        tests: selectedTests.map((testName) => {
+          const service = selectedLab.services.find((s) => s.name === testName);
+          return {
+            name: testName,
+            price: service?.labPrice || 0,
+          };
+        }),
         status: "pending",
         notes,
         labName: selectedLab.labName,
@@ -127,7 +165,6 @@ export default function AppointmentForm() {
       };
 
       await addDoc(collection(db, "appointments"), appointment);
-
       toast.success("Appointment booked successfully!");
       setIsModalOpen(false);
       setSelectedTests([]);
@@ -248,14 +285,14 @@ export default function AppointmentForm() {
                 <div className="flex items-start gap-2 text-gray-600">
                   <Beaker size={18} className="mt-1" />
                   <div>
-                    <p className="font-medium mb-1">Services:</p>
+                    <p className="font-medium mb-1">Services & Prices:</p>
                     <div className="flex flex-wrap gap-2">
                       {lab.services.map((service) => (
                         <span
-                          key={service}
+                          key={service.id}
                           className="bg-blue-50 text-blue-700 px-2 py-1 rounded-full text-sm"
                         >
-                          {service}
+                          {service.name} - ₦{service.labPrice.toFixed(2)}
                         </span>
                       ))}
                     </div>
@@ -348,31 +385,41 @@ export default function AppointmentForm() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Select Tests
               </label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {selectedLab.services.map((test) => (
-                  <label
-                    key={test}
-                    className={`flex items-center gap-2 p-3 rounded-lg border cursor-pointer transition-colors ${
-                      selectedTests.includes(test)
-                        ? "bg-blue-50 border-blue-500"
-                        : "border-gray-200 hover:bg-gray-50"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedTests.includes(test)}
-                      onChange={() => {
-                        setSelectedTests(
-                          selectedTests.includes(test)
-                            ? selectedTests.filter((t) => t !== test)
-                            : [...selectedTests, test]
-                        );
-                      }}
-                      className="rounded text-blue-600"
-                    />
-                    <span className="text-sm">{test}</span>
-                  </label>
-                ))}
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Tests & View Prices
+                </label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {selectedLab.services.map((service) => (
+                    <label
+                      key={service.id}
+                      className={`flex items-center gap-2 p-3 rounded-lg border cursor-pointer transition-colors ${
+                        selectedTests.includes(service.name)
+                          ? "bg-blue-50 border-blue-500"
+                          : "border-gray-200 hover:bg-gray-50"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedTests.includes(service.name)}
+                        onChange={() => {
+                          setSelectedTests(
+                            selectedTests.includes(service.name)
+                              ? selectedTests.filter((t) => t !== service.name)
+                              : [...selectedTests, service.name]
+                          );
+                        }}
+                        className="rounded text-blue-600"
+                      />
+                      <div>
+                        <span className="text-sm block">{service.name}</span>
+                        <span className="text-xs text-green-600 block">
+                          ₦{service.labPrice.toFixed(2)}
+                        </span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
 

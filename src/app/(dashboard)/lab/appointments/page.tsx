@@ -30,28 +30,19 @@ import {
   Loader2,
 } from "lucide-react";
 
-interface Lab {
-  id: string;
-  email: string;
-  labName: string;
-  address: string;
-  phone: string;
-  operatingHours: {
-    openingTime: string;
-    closingTime: string;
-  };
-  services: string[];
-  state: string;
-  town: string;
-}
+
 
 interface Appointment {
   id?: string;
+
   userId: string;
   labId: string;
   date: string;
   time: string;
-  tests: string[];
+  tests: Array<{
+    name: string;
+    price: number;
+  }>;
   status: "pending" | "confirmed" | "completed" | "canceled";
   notes?: string;
   labName: string;
@@ -422,20 +413,23 @@ export default function AppointmentsDashboard() {
                       </span>
                     </div>
 
-                    <div className="bg-gray-100 p-3 rounded-xl">
+                    <div className="bg-gray-50 py-4 rounded-xl hover:bg-gray-100 transition-colors duration-200">
                       <div className="flex items-start gap-3">
                         <FileText className="h-5 w-5 text-blue-600 mt-1" />
-                        <div>
-                          <span className="font-semibold text-gray-800">
-                            Tests:
+                        <div className="flex-1">
+                          <span className="font-semibold text-gray-900">
+                            Tests
                           </span>
-                          <div className="mt-2 flex flex-wrap gap-2">
+                          <div className="mt-3 flex flex-wrap gap-2">
                             {appointment.tests.map((test, index) => (
                               <span
                                 key={index}
-                                className="bg-white text-gray-700 px-3 py-1 rounded-full text-xs border"
+                                className="bg-white text-gray-700 px-4 py-2 rounded-xl text-sm border shadow-sm hover:shadow-md transition-shadow duration-200"
                               >
-                                {test}
+                                {test?.name}
+                                <span className="text-blue-600 ml-1">
+                                  ₦{test.price}
+                                </span>
                               </span>
                             ))}
                           </div>
