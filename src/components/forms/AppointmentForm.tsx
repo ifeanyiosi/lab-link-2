@@ -18,6 +18,7 @@ import {
   Building2,
   Beaker,
 } from "lucide-react";
+import { statesAndTowns } from "@/lib/constants";
 
 export interface LabService {
   id: string;
@@ -63,14 +64,9 @@ export interface Appointment {
   patientLastName: string;
 }
 
-const statesAndTowns: { [key: string]: string[] } = {
-  Enugu: ["Enugu North", "Enugu South", "Nsukka"],
-  Lagos: ["Ikeja", "Lekki", "Victoria Island"],
-  Abuja: ["Garki", "Maitama", "Wuse"],
-};
-
 export default function AppointmentForm() {
   const { user } = useAuth();
+  const [selectedService, setSelectedService] = useState<string>("");
   const [selectedState, setSelectedState] = useState("");
   const [selectedTown, setSelectedTown] = useState("");
   const [labs, setLabs] = useState<Lab[]>([]);
@@ -109,8 +105,6 @@ export default function AppointmentForm() {
         const labData = doc.data() as Omit<Lab, "id" | "services">;
         const servicesCol = collection(db, "users", doc.id, "lab-services");
         const servicesSnapshot = await getDocs(servicesCol);
-        console.log("Fetching services for lab:", doc.id);
-        console.log("Services snapshot size:", servicesSnapshot.size);
 
         const services = servicesSnapshot.docs.map((serviceDoc) => ({
           id: serviceDoc.id,
@@ -195,8 +189,8 @@ export default function AppointmentForm() {
       />
 
       {/* Search Section */}
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+      <div className="bg-white flex flex-col rounded-lg shadow-lg p-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full  mx-auto">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               State
@@ -285,17 +279,7 @@ export default function AppointmentForm() {
                 <div className="flex items-start gap-2 text-gray-600">
                   <Beaker size={18} className="mt-1" />
                   <div>
-                    <p className="font-medium mb-1">Services & Prices:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {lab.services.map((service) => (
-                        <span
-                          key={service.id}
-                          className="bg-blue-50 text-blue-700 px-2 py-1 rounded-full text-sm"
-                        >
-                          {service.name} - ₦{service.labPrice.toFixed(2)}
-                        </span>
-                      ))}
-                    </div>
+                    <p className="font-medium mb-1">{lab.email}</p>
                   </div>
                 </div>
               </div>
@@ -383,45 +367,82 @@ export default function AppointmentForm() {
 
             <div className="mt-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Tests
+                Select Test
               </label>
-              <div className="mt-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Tests & View Prices
-                </label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {selectedLab.services.map((service) => (
-                    <label
-                      key={service.id}
-                      className={`flex items-center gap-2 p-3 rounded-lg border cursor-pointer transition-colors ${
-                        selectedTests.includes(service.name)
-                          ? "bg-blue-50 border-blue-500"
-                          : "border-gray-200 hover:bg-gray-50"
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedTests.includes(service.name)}
-                        onChange={() => {
-                          setSelectedTests(
-                            selectedTests.includes(service.name)
-                              ? selectedTests.filter((t) => t !== service.name)
-                              : [...selectedTests, service.name]
-                          );
-                        }}
-                        className="rounded text-blue-600"
-                      />
-                      <div>
-                        <span className="text-sm block">{service.name}</span>
-                        <span className="text-xs text-green-600 block">
-                          ₦{service.labPrice.toFixed(2)}
-                        </span>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
+              <select
+                value={selectedService}
+                onChange={(e) => {
+                  const selectedServiceName = e.target.value;
+                  setSelectedService(selectedServiceName);
+                  // Add the selected test to the tests array
+                  if (
+                    selectedServiceName &&
+                    !selectedTests.includes(selectedServiceName)
+                  ) {
+                    setSelectedTests([...selectedTests, selectedServiceName]);
+                  }
+                }}
+                className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Select a test</option>
+                {selectedLab.services.map((service) => (
+                  <option key={service.id} value={service.name}>
+                    {service.name} - ₦{service.labPrice.toFixed(2)}
+                  </option>
+                ))}
+              </select>
             </div>
+
+            {/* Add selected tests display */}
+            <div className="mt-4">
+              {selectedTests.map((test) => (
+                <div
+                  key={test}
+                  className="flex items-center justify-between bg-gray-50 p-3 rounded mb-2"
+                >
+                  <span>{test}</span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSelectedTests(selectedTests.filter((t) => t !== test))
+                    }
+                    className="text-red-600 hover:text-red-800"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+            {selectedService && (
+              <div className="mt-4 bg-blue-50 p-4 rounded-lg">
+                <h3 className="text-md font-semibold mb-2">Service Details</h3>
+                {(() => {
+                  const selectedServiceDetails = selectedLab.services.find(
+                    (service) => service.name === selectedService
+                  );
+                  return selectedServiceDetails ? (
+                    <div className="space-y-2">
+                      <p>
+                        <span className="font-medium">Sample Type:</span>{" "}
+                        {selectedServiceDetails.details.sampleType}
+                      </p>
+                      <p>
+                        <span className="font-medium">Collection Method:</span>{" "}
+                        {selectedServiceDetails.details.collectionMethod}
+                      </p>
+                      <p>
+                        <span className="font-medium">Results Timeframe:</span>{" "}
+                        {selectedServiceDetails.details.resultsTimeframe}
+                      </p>
+                      <p>
+                        <span className="font-medium">Preparation:</span>{" "}
+                        {selectedServiceDetails.details.preparation}
+                      </p>
+                    </div>
+                  ) : null;
+                })()}
+              </div>
+            )}
 
             <div className="mt-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">

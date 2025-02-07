@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -26,8 +27,10 @@ import { doc, getDoc } from "firebase/firestore";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
+import { unstable_noStore as noStore } from "next/cache";
 
 const SigninPage = () => {
+  noStore();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
@@ -101,12 +104,28 @@ const SigninPage = () => {
       }, 2000);
 
       return () => clearTimeout(redirectTimer);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Sign-in error:", err);
-      toast.error("Invalid email or password. Please try again.", {
-        position: "top-right",
+      let errorMessage = "An error occurred. Please try again.";
+
+      if (err.code === "auth/invalid-credential") {
+        errorMessage = "Incorrect email or password. Please try again.";
+      } else if (err.code === "auth/user-not-found") {
+        errorMessage = "No account found with this email.";
+      } else if (err.code === "auth/wrong-password") {
+        errorMessage = "Incorrect password. Try again.";
+      } else if (err.code === "auth/network-request-failed") {
+        errorMessage = "Network error. Check your internet connection.";
+      } else if (err.code === "auth/too-many-requests") {
+        errorMessage =
+          "Too many failed login attempts. Please try again later.";
+      }
+
+      toast.error(errorMessage, {
+        position: "top-center",
         autoClose: 3000,
         theme: "dark",
+        hideProgressBar: true,
       });
     } finally {
       setLoading(false);
@@ -160,8 +179,16 @@ const SigninPage = () => {
       {/* Right Side - Form */}
       <div className="w-full md:w-1/2 lg:w-3/5 flex flex-col justify-center items-center p-6 overflow-y-auto">
         <div className="py-5">
-          <Link className="text-5xl font-bold text-black" href={"/"}>
-            Lab Link
+          <Link
+            className="text-5xl flex flex-col items-center font-bold text-black"
+            href={"/"}
+          >
+            <img
+              className="h-[150px] w-[150px] "
+              src="/lab-link-logo.png"
+              alt="Lab Link Logo"
+            />
+            <span>Lab Link</span>
           </Link>
         </div>
 

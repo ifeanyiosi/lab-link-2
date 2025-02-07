@@ -19,8 +19,8 @@ const LabLinkLandingPage: React.FC = () => {
       <main className="container mx-auto min-h-screen px-4 py-16 grid md:grid-cols-2 gap-12 items-center">
         <div>
           <h1 className="text-5xl font-extrabold text-blue-900 mb-6 leading-tight">
-            Your Health, <br />
-            Simplified
+            Test anywhere with, <br />
+            <span className="text-primary">Lab Link</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8">
             Schedule lab tests, access results, and manage your health journey
@@ -31,7 +31,7 @@ const LabLinkLandingPage: React.FC = () => {
               <Link href={"/sign-in"}>Book a Test</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link href={"#about"}>Learn more</Link>
+              <Link href={"/about"}>Learn more</Link>
             </Button>
           </div>
         </div>

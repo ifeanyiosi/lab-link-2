@@ -12,6 +12,21 @@ import {
   User2,
 } from "lucide-react";
 
+export const headLinks = [
+  {
+    name: "About",
+    href: "/about",
+  },
+  {
+    name: "Login",
+    href: "/sign-in",
+  },
+  {
+    name: "Sign up",
+    href: "/sign-up",
+  },
+];
+
 export const navLinks = [
   {
     name: "About",

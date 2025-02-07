@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { unstable_noStore as noStore } from "next/cache";
 import { z } from "zod";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
@@ -53,6 +54,7 @@ const stateOptions = Object.keys(stateTownMapping).map((state) => ({
 }));
 
 const SignupPage = () => {
+  noStore();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
@@ -68,8 +70,7 @@ const SignupPage = () => {
       address: "",
       password: "",
       confirmPassword: "",
-      state: "",
-      town: "",
+
       role: "patient",
       gender: "Male", // Ensure gender is added to the form values
     },
@@ -88,8 +89,6 @@ const SignupPage = () => {
         phone,
         address,
         gender,
-        state,
-        town,
       } = data;
 
       // Sign up with email/password
@@ -106,8 +105,7 @@ const SignupPage = () => {
         firstName,
         lastName,
         phone,
-        state,
-        town,
+
         address,
         role, // Save the role selected by the user
         gender, // Save the gender
@@ -124,11 +122,34 @@ const SignupPage = () => {
 
       router.push("/patient");
       form.reset();
-    } catch (err) {
-      setError("Error: " + (err as Error).message);
-      toast.error("Invalid email or password. Please try again.", {
+    } catch (err: any) {
+      let errorMessage = "An error occurred. Please try again.";
+
+      switch (err.code) {
+        case "auth/email-already-in-use":
+          errorMessage = "This email is already registered. Try logging in.";
+          break;
+        case "auth/invalid-email":
+          errorMessage = "Invalid email format. Please enter a valid email.";
+          break;
+        case "auth/weak-password":
+          errorMessage = "Password is too weak. Use at least 6 characters.";
+          break;
+        case "auth/network-request-failed":
+          errorMessage = "Network error. Check your internet connection.";
+          break;
+        case "auth/internal-error":
+          errorMessage = "Internal error. Please try again later.";
+          break;
+        default:
+          errorMessage = "Error: " + err.message;
+      }
+
+      setError(errorMessage);
+
+      toast.error(errorMessage, {
         position: "top-right",
-        autoClose: 2000,
+        autoClose: 3000,
         theme: "dark",
       });
     } finally {
@@ -250,64 +271,6 @@ const SignupPage = () => {
                       )}
                     />
                   </div>
-
-                  <FormField
-                    control={form.control}
-                    name="state"
-                    render={({ field }) => (
-                      <FormItem>
-                        <Label>State</Label>
-                        <Select
-                          options={stateOptions}
-                          value={
-                            field.value
-                              ? { value: field.value, label: field.value }
-                              : null
-                          }
-                          onChange={(
-                            selected: SingleValue<{
-                              value: string;
-                              label: string;
-                            }>
-                          ) => {
-                            field.onChange(selected?.value);
-                            setTowns(
-                              stateTownMapping[
-                                selected?.value as keyof typeof stateTownMapping
-                              ] || []
-                            );
-                          }}
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  {/* Town Field */}
-                  <FormField
-                    control={form.control}
-                    name="town"
-                    render={({ field }) => (
-                      <FormItem>
-                        <Label>Town</Label>
-                        <Select
-                          options={towns}
-                          value={
-                            field.value
-                              ? { value: field.value, label: field.value }
-                              : null
-                          }
-                          onChange={(
-                            selected: SingleValue<{
-                              value: string;
-                              label: string;
-                            }>
-                          ) => field.onChange(selected?.value)}
-                          isDisabled={!towns.length}
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
                   {/* Address */}
                   <div>

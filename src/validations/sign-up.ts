@@ -8,8 +8,6 @@ export const signupSchema = z
     password: z.string().min(6, "Password must be at least 6 characters"),
     address: z.string().min(5, "Address must be at least 5 characters"),
     gender: z.enum(["Male", "Female", "Other"]),
-    state: z.string().min(1, "Select a state"),
-    town: z.string().min(1, "Select a town"),
     phone: z
       .string()
       .regex(

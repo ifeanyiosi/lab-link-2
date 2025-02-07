@@ -1,22 +1,34 @@
+/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import React from "react";
 
 import { Button } from "../ui/button";
 import { unstable_noStore as noStore } from "next/cache";
 import MobileMenu from "./MobileMenu";
-import { navLinks } from "@/constants";
-import { Stethoscope } from "lucide-react";
 
 export default async function HomeHeader() {
   noStore();
   return (
     <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm">
       <div className="container mx-auto flex justify-between items-center p-4">
-        <div className="flex items-center space-x-2">
-          <Stethoscope className="text-primary" size={32} />
-          <span className="text-2xl font-bold text-primary">Lab Link</span>
+        <Link
+          href={"/"}
+          className="flex items-center text-2xl font-bold text-primary space-x-2"
+        >
+          <img
+            className="h-[50px] w-[50px] "
+            src="/lab-link-logo.png"
+            alt="Lab Link Logo"
+          />
+          Lab Link
+        </Link>
+        <div className="flex lg:hidden">
+          <MobileMenu />
         </div>
-        <div className="space-x-4">
+        <div className="space-x-4 hidden lg:flex ">
+          <Button asChild variant="ghost">
+            <Link href={"/about"}>About</Link>
+          </Button>
           <Button asChild variant="ghost">
             <Link href={"/sign-in"}>Login</Link>
           </Button>
