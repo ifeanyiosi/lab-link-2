@@ -129,7 +129,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         {
           icon: "/settings.png",
           label: "Settings",
-          href: "/settings",
+          href: "/patient/settings",
           visible: ["admin", "doctor", "patient", "lab"],
         },
       ],
@@ -140,7 +140,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         {
           icon: "/faq.png",
           label: "Support & FAQs",
-          href: "/profile",
+          href: "/patient/support",
           visible: ["admin", "doctor", "patient", "lab"],
         },
         // {

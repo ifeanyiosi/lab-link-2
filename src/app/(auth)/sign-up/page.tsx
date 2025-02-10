@@ -19,46 +19,24 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import Select, { SingleValue } from "react-select";
 import {
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  signInWithPopup,
 } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/firebase/firebaseConfig";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Bounce, toast } from "react-toastify";
-
-const stateTownMapping = {
-  Lagos: [
-    { value: "Ikeja", label: "Ikeja" },
-    { value: "Surulere", label: "Surulere" },
-    { value: "Lekki", label: "Lekki" },
-  ],
-  Enugu: [
-    { value: "Nsukka", label: "Nsukka" },
-    { value: "Awgu", label: "Awgu" },
-    { value: "Enugu North", label: "Enugu North" },
-  ],
-  Kano: [
-    { value: "Gwale", label: "Gwale" },
-    { value: "Nasarawa", label: "Nasarawa" },
-    { value: "Tarauni", label: "Tarauni" },
-  ],
-};
-
-const stateOptions = Object.keys(stateTownMapping).map((state) => ({
-  value: state,
-  label: state,
-}));
+import { FaGoogle, FaFacebook } from "react-icons/fa";
 
 const SignupPage = () => {
   noStore();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
-  const [towns, setTowns] = useState<{ value: string; label: string }[]>([]);
 
   const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
@@ -67,29 +45,81 @@ const SignupPage = () => {
       lastName: "",
       email: "",
       phone: "",
-      address: "",
       password: "",
       confirmPassword: "",
-
       role: "patient",
-      gender: "Male", // Ensure gender is added to the form values
     },
   });
+
+  const handleSocialSignup = async (provider: "google" | "facebook") => {
+    setLoading(true);
+    try {
+      let authProvider;
+      if (provider === "google") {
+        authProvider = new GoogleAuthProvider();
+      } else {
+        authProvider = new FacebookAuthProvider();
+      }
+
+      const userCredential = await signInWithPopup(auth, authProvider);
+      const user = userCredential.user;
+
+      // Check if user already exists in Firestore
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      // If user doesn't exist, create a new document
+      if (!userDoc.exists()) {
+        await setDoc(userDocRef, {
+          email: user.email,
+          firstName: user.displayName?.split(" ")[0] || "",
+          lastName: user.displayName?.split(" ")[1] || "",
+          role: "patient",
+          createdAt: new Date(),
+          profilePicture: user.photoURL || "",
+        });
+      }
+
+      toast.success("Successfully signed up!", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: true,
+        transition: Bounce,
+        theme: "dark",
+      });
+
+      router.push("/patient");
+    } catch (error: any) {
+      console.error(error);
+
+      let errorMessage = "Social signup failed";
+      switch (error.code) {
+        case "auth/account-exists-with-different-credential":
+          errorMessage = "Email already used with different method";
+          break;
+        case "auth/popup-blocked":
+          errorMessage = "Popup blocked. Please enable popups";
+          break;
+        case "auth/popup-closed-by-user":
+          errorMessage = "Signup canceled";
+          return;
+      }
+
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "dark",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const onSubmit = async (data: z.infer<typeof signupSchema>) => {
     setLoading(true);
     try {
       // Extract values from form data
-      const {
-        email,
-        password,
-        role,
-        firstName,
-        lastName,
-        phone,
-        address,
-        gender,
-      } = data;
+      const { email, password, role, firstName, lastName, phone } = data;
 
       // Sign up with email/password
       const userCredential = await createUserWithEmailAndPassword(
@@ -105,10 +135,7 @@ const SignupPage = () => {
         firstName,
         lastName,
         phone,
-
-        address,
-        role, // Save the role selected by the user
-        gender, // Save the gender
+        role,
         createdAt: new Date(),
       });
 
@@ -158,7 +185,7 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="flex  h-screen w-full ">
+    <div className="flex h-screen w-full">
       {/* Left Side - Image */}
       <div className="w-full hidden md:block md:w-1/2 relative h-48 md:h-screen">
         <div className="hidden md:block md:w-1/2 fixed top-0 left-0 h-screen">
@@ -174,7 +201,7 @@ const SignupPage = () => {
 
       {/* Right Side - Form */}
       <div className="w-full lg:flex flex-col md:items-center md:justify-center md:w-1/2 h-screen overflow-y-auto py-5 p-4">
-        <Card className="w-full    max-w-md  ">
+        <Card className="w-full max-w-md">
           <CardContent>
             <h1 className="text-xl font-semibold mb-4 py-2 text-start">
               Patient Sign Up
@@ -183,7 +210,7 @@ const SignupPage = () => {
               <form onSubmit={form.handleSubmit(onSubmit)}>
                 <div className="flex flex-col gap-4">
                   {/* First Name */}
-                  <div className="flex flex-col md:flex-row gap-4 w-full items-center md:justify-between ">
+                  <div className="flex flex-col md:flex-row gap-4 w-full items-center md:justify-between">
                     <div className="w-full">
                       <Label htmlFor="firstName">First Name</Label>
                       <FormField
@@ -236,54 +263,6 @@ const SignupPage = () => {
                             <Input
                               {...field}
                               placeholder="Enter your email address"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  {/* Gender */}
-                  <div>
-                    <Label htmlFor="gender">Gender</Label>
-                    <FormField
-                      control={form.control}
-                      name="gender"
-                      render={({ field }) => (
-                        <FormItem>
-                          <Select
-                            options={[
-                              { value: "Male", label: "Male" },
-                              { value: "Female", label: "Female" },
-                            ]}
-                            value={
-                              field.value
-                                ? { value: field.value, label: field.value }
-                                : null
-                            }
-                            onChange={(selected) =>
-                              field.onChange(selected?.value)
-                            }
-                          />
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  {/* Address */}
-                  <div>
-                    <Label htmlFor="address">Address</Label>
-                    <FormField
-                      control={form.control}
-                      name="address"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              placeholder="Enter your house address"
                             />
                           </FormControl>
                           <FormMessage />
@@ -378,6 +357,28 @@ const SignupPage = () => {
                 </div>
               </form>
             </Form>
+
+            {/* Social Signup Buttons */}
+            <div className="mt-4 w-full space-y-3">
+              <div className="flex items-center">
+                <div className="flex-grow border-t border-gray-300"></div>
+                <span className="px-4 text-gray-500 text-sm">
+                  Or sign up with
+                </span>
+                <div className="flex-grow border-t border-gray-300"></div>
+              </div>
+
+              <div className=" w-full gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => handleSocialSignup("google")}
+                  disabled={loading}
+                  className="flex items-center w-full justify-center gap-2"
+                >
+                  <FaGoogle /> Google
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
         <div className="text-center mt-4">

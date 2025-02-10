@@ -18,16 +18,22 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
 import { auth, db } from "@/firebase/firebaseConfig";
 import { Bounce, toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { useAuth, UserDetails } from "@/context/AuthContext";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 import { unstable_noStore as noStore } from "next/cache";
+import { FaGoogle, FaFacebook } from "react-icons/fa";
 
 const SigninPage = () => {
   noStore();
@@ -69,6 +75,85 @@ const SigninPage = () => {
 
     return () => unsubscribe();
   }, [router]);
+
+  const handleSocialSignin = async (provider: "google" | "facebook") => {
+    setLoading(true);
+    try {
+      let authProvider;
+      if (provider === "google") {
+        authProvider = new GoogleAuthProvider();
+      } else {
+        authProvider = new FacebookAuthProvider();
+      }
+
+      const userCredential = await signInWithPopup(auth, authProvider);
+      const user = userCredential.user;
+
+      // Check if user already exists in Firestore
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      // If user doesn't exist, create a new document
+      if (!userDoc.exists()) {
+        await setDoc(userDocRef, {
+          email: user.email,
+          firstName: user.displayName?.split(" ")[0] || "",
+          lastName: user.displayName?.split(" ")[1] || "",
+          role: "patient", // Default role
+          createdAt: new Date(),
+          profilePicture: user.photoURL || "",
+        });
+      }
+
+      const userData = userDoc.exists()
+        ? (userDoc.data() as UserDetails)
+        : { role: "patient" };
+
+      toast.success("Successfully signed in!", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: true,
+        transition: Bounce,
+        theme: "dark",
+      });
+
+      setRedirecting(true);
+      const redirectTimer = setTimeout(() => {
+        router.replace(
+          userData.role === "patient"
+            ? "/patient"
+            : userData.role === "lab"
+            ? "/lab"
+            : "/"
+        );
+      }, 2000);
+
+      return () => clearTimeout(redirectTimer);
+    } catch (error: any) {
+      console.error(error);
+
+      let errorMessage = "Social signin failed";
+      switch (error.code) {
+        case "auth/account-exists-with-different-credential":
+          errorMessage = "Email already used with different method";
+          break;
+        case "auth/popup-blocked":
+          errorMessage = "Popup blocked. Please enable popups.";
+          break;
+        case "auth/popup-closed-by-user":
+          errorMessage = "Signin canceled";
+          return;
+      }
+
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "dark",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const onSubmit = async (data: z.infer<typeof signinSchema>) => {
     setLoading(true);
@@ -266,6 +351,28 @@ const SigninPage = () => {
                 </Button>
               </form>
             </Form>
+
+            {/* Social Signin Buttons */}
+            <div className="mt-4 w-full space-y-3">
+              <div className="flex items-center">
+                <div className="flex-grow border-t border-gray-300"></div>
+                <span className="px-4 text-gray-500 text-sm">
+                  Or sign in with
+                </span>
+                <div className="flex-grow border-t border-gray-300"></div>
+              </div>
+
+              <div className="w-full">
+                <Button
+                  variant="outline"
+                  onClick={() => handleSocialSignin("google")}
+                  disabled={loading || redirecting}
+                  className="flex w-full items-center justify-center gap-2"
+                >
+                  <FaGoogle /> Google
+                </Button>
+              </div>
+            </div>
           </CardContent>
           <div className="text-center py-4">
             <span className="text-gray-600">Don&apos;t have an account? </span>

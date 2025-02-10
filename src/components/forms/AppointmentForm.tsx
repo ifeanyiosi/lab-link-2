@@ -340,6 +340,27 @@ export default function AppointmentForm() {
                   className="bg-gray-50"
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Phone
+                </label>
+                <Input
+                  type="text"
+                  value={user?.phone || ""}
+                  className="bg-gray-50"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  E-mail
+                </label>
+                <Input
+                  type="email"
+                  value={user?.email || ""}
+                  className="bg-gray-50"
+                />
+              </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
