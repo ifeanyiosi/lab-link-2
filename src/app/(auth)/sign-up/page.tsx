@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState } from "react";
@@ -375,7 +376,8 @@ const SignupPage = () => {
                   disabled={loading}
                   className="flex items-center w-full justify-center gap-2"
                 >
-                  <FaGoogle /> Google
+                  <img className="w-5 h-5" src="/icons/google.png" alt="" />
+                  Sign up with Google
                 </Button>
               </div>
             </div>

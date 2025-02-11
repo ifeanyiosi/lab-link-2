@@ -34,6 +34,7 @@ import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 import { unstable_noStore as noStore } from "next/cache";
 import { FaGoogle, FaFacebook } from "react-icons/fa";
+import { Eye, EyeOff } from "lucide-react";
 
 const SigninPage = () => {
   noStore();
@@ -41,6 +42,7 @@ const SigninPage = () => {
   const [loading, setLoading] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
   const { user } = useAuth();
 
   const form = useForm<z.infer<typeof signinSchema>>({
@@ -306,7 +308,7 @@ const SigninPage = () => {
                   </div>
 
                   {/* Password Field */}
-                  <div>
+                  <div className="relative">
                     <Label htmlFor="password">Password</Label>
                     <FormField
                       control={form.control}
@@ -314,11 +316,27 @@ const SigninPage = () => {
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input
-                              type="password"
-                              {...field}
-                              placeholder="Enter your password"
-                            />
+                            <div className="relative">
+                              <Input
+                                type={showPassword ? "text" : "password"}
+                                {...field}
+                                placeholder="Enter your password"
+                                className="pr-10"
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 p-2"
+                                onClick={() => setShowPassword(!showPassword)}
+                              >
+                                {showPassword ? (
+                                  <EyeOff size={18} />
+                                ) : (
+                                  <Eye size={18} />
+                                )}
+                              </Button>
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -367,9 +385,10 @@ const SigninPage = () => {
                   variant="outline"
                   onClick={() => handleSocialSignin("google")}
                   disabled={loading || redirecting}
-                  className="flex w-full items-center justify-center gap-2"
+                  className="flex w-full items-center justify-center gap-1"
                 >
-                  <FaGoogle /> Google
+                  <img className="w-5 h-5" src="/icons/google.png" alt="" />{" "}
+                  Continue with Google
                 </Button>
               </div>
             </div>
