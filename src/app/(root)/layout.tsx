@@ -18,7 +18,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body suppressHydrationWarning className={inter.className}>
+      <body suppressHydrationWarning={true} className={inter.className}>
         <AuthProvider>
           <HomeHeader />
           <main className="min-h-screen">{children}</main>

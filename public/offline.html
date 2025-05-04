@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline - Lab Link</title>
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: #f8fafc;
+      color: #0F172A;
+    }
+    .logo {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      margin-bottom: 16px;
+      color: #0F172A;
+    }
+    p {
+      max-width: 500px;
+      line-height: 1.6;
+    }
+    .btn {
+      margin-top: 20px;
+      padding: 12px 24px;
+      background-color: #0F172A;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <img src="/icons/lab-link-logo.png" alt="Lab Link Logo" class="logo">
+  <h1>You're currently offline</h1>
+  <p>Please check your internet connection to continue booking and managing your lab appointments.</p>
+  <button class="btn" onclick="window.location.reload()">Try Again</button>
+</body>
+</html>

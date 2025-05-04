@@ -1,19 +1,14 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import {
-  onAuthStateChanged,
-  User as FirebaseUser,
-  getAuth,
-  signOut,
-} from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/firebase/firebaseConfig";
 
 export interface UserDetails {
   uid: string;
   email: string;
-  role: string; // Ensure this exists in Firestore
+  role: string;
   firstName: string;
   lastName: string;
   phone: string;
@@ -26,15 +21,33 @@ interface AuthContextProps {
   logout: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextProps | undefined>(undefined);
+// Create a default context
+const defaultAuthContext: AuthContextProps = {
+  user: null,
+  loading: true,
+  logout: async () => {},
+};
+
+const AuthContext = createContext<AuthContextProps>(defaultAuthContext);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  // For hydration safety, defer any state changes until after mount
+  const [isClient, setIsClient] = useState(false);
   const [user, setUser] = useState<UserDetails | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Only set isClient to true after component is mounted on client
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Set up auth state listener only on the client
+  useEffect(() => {
+    // Don't run this effect during SSR or before hydration is complete
+    if (!isClient) return;
+    
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
@@ -53,11 +66,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       } else {
         setUser(null);
       }
-      setLoading(false); // Always set loading to false
+      setLoading(false);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [isClient]);
 
   const logout = async () => {
     try {
@@ -70,14 +83,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <AuthContext.Provider value={{ user, loading, logout }}>
-      {children} {/* Always render children, even during loading */}
+      {children}
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;

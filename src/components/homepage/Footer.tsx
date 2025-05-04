@@ -1,11 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
-'use client'
+"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowUp, Mail, MapPin, Phone } from "lucide-react";
 import { Button } from "../ui/button";
-
 
 const Footer = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -45,7 +44,7 @@ const Footer = () => {
       <div
         className="absolute inset-0 bg-cover bg-center z-0"
         style={{
-          backgroundImage: "url('/footer.jpg')",
+          backgroundImage: "url('/images/footer.jpg')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           opacity: 0.1,
@@ -124,7 +123,7 @@ const Footer = () => {
         <div className="mt-16 pt-8 border-t border-gray-700/50">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-sm text-gray-400">
-              © {new Date().getFullYear()} Lab Link. All rights reserved.
+              © 2025 Lab Link. All rights reserved.
             </p>
             <div className="flex space-x-6">
               <Link

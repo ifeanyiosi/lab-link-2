@@ -17,7 +17,6 @@ export const metadata: Metadata = {
     "book lab test",
     "healthcare scheduling",
   ],
-
   openGraph: {
     title: "Lab Link - Effortless Lab Appointment Scheduling",
     description:
@@ -25,9 +24,9 @@ export const metadata: Metadata = {
     type: "website",
     url: "https://lab-link-2.vercel.app",
   },
+  themeColor: "#0F172A", // match your branding color
 };
 
-// Client-side only components
 const ClientSideComponents = dynamic(
   () => import("@/components/ClientSideComponents"),
   { ssr: false }
@@ -40,7 +39,31 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body suppressHydrationWarning className={inter.className}>
+      <head>
+        {/* Manifest and Icons */}
+        <link rel="manifest" href="/manifest.json" />
+        <link
+          rel="apple-touch-icon"
+          sizes="192x192"
+          href="/icons/lab-link-logo.png"
+        />
+        <link
+          rel="apple-touch-icon"
+          sizes="512x512"
+          href="/icons/lab-link-logo.png"
+        />
+
+        {/* PWA Meta Tags */}
+        <meta name="theme-color" content="#0F172A" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
+      <body suppressHydrationWarning={true} className={inter.className}>
         <AuthProvider>
           {children}
           <ClientSideComponents />

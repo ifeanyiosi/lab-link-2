@@ -5,8 +5,6 @@ import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
 import Link from "next/link";
 import { Menu as MenuIcon, X } from "lucide-react";
-import EventCalendar from "@/components/EventCalendar";
-import Announcements from "@/components/Announcements";
 import RightSidebar from "@/components/RightSidebar";
 import { useRouter } from "next/navigation";
 
@@ -29,16 +27,22 @@ interface DashboardLayoutProps {
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const router = useRouter();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
+
   const { user, loading, logout } = useAuth();
   const role = user?.role || "";
 
   useEffect(() => {
-    if (!loading && !user) {
+    setHasMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (hasMounted && !loading && !user) {
       router.replace("/sign-in");
     }
-  }, [user, loading, router]);
+  }, [user, loading, hasMounted, router]);
 
-  if (loading) {
+  if (!hasMounted || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
@@ -46,9 +50,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     );
   }
 
-  if (!user) {
-    return null; // Return null while redirecting
-  }
+  if (!user) return null;
 
   const menuItems: MenuSection[] = [
     {
@@ -110,10 +112,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     },
   ];
 
-
   return (
     <div className="min-h-screen flex flex-col lg:flex-row overflow-hidden">
-      {/* Mobile Header - Fixed */}
+      {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 bg-white z-50 px-4 py-3 flex items-center justify-between shadow-sm">
         <button
           onClick={() => setSidebarOpen(!isSidebarOpen)}
@@ -131,10 +132,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           />
           <span className="font-bold text-lg">Lablink</span>
         </Link>
-        <div className="w-10" /> {/* Spacer for balance */}
+        <div className="w-10" />
       </div>
 
-      {/* Sidebar - Fixed for desktop, absolute for mobile */}
+      {/* Sidebar */}
       <aside
         className={`fixed lg:sticky top-0 left-0 h-full bg-white z-40 
           transition-transform duration-300 ease-in-out
@@ -142,7 +143,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           lg:translate-x-0 w-64 lg:w-[16%] xl:w-[14%] shadow-lg lg:shadow-none
           flex flex-col`}
       >
-        {/* Logo section - desktop only */}
         <div className="hidden lg:flex items-center gap-2 p-4 border-b">
           <Image
             src="/icons/lab-link-logo.png"
@@ -154,7 +154,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <span className="font-bold text-lg">Lablink</span>
         </div>
 
-        {/* Scrollable menu area */}
         <div className="flex-1 overflow-y-auto pt-16 lg:pt-0">
           {menuItems.map((section, idx) => (
             <div key={section.title || idx} className="flex flex-col py-4">
@@ -187,7 +186,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           ))}
         </div>
 
-        {/* Logout button - fixed at bottom */}
         <div className="p-4 border-t mt-auto">
           <button
             onClick={logout}
@@ -205,16 +203,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </div>
       </aside>
 
-      {/* Main content area */}
+      {/* Main Content */}
       <main className="flex-1 lg:flex overflow-hidden h-screen pt-14 lg:pt-0 bg-[#F7F8FA]">
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-[1920px] mx-auto p-4 lg:p-6">
             <div className="flex flex-col lg:flex-row gap-6">
-              {/* Main content */}
               <div className="flex-1 overflow-y-auto">{children}</div>
-
-              {/* Right sidebar */}
-              <div className="w-full lg:w-1/3 ">
+              <div className="w-full lg:w-1/3">
                 <RightSidebar />
               </div>
             </div>
@@ -222,7 +217,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </div>
       </main>
 
-      {/* Mobile overlay */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"

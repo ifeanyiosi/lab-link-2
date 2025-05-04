@@ -2,24 +2,20 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import clsx from "clsx";
-import Image from "next/image";
+import { Button } from "../ui/button";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [activePage, setActivePage] = useState("/");
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
-
-    // Set active page based on current path
-    if (typeof window !== "undefined") {
-      setActivePage(window.location.pathname);
-    }
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -44,14 +40,12 @@ const Navbar = () => {
   const navItems = [
     { name: "About", link: "/about" },
     { name: "Contact", link: "/contact" },
-    { name: "Sign Up", link: "/sign-up" },
-    
   ];
 
   return (
     <nav
       className={clsx(
-        "fixed top-0  left-0 w-full z-50 transition-all duration-300",
+        "fixed top-0 left-0 w-full z-50 transition-all duration-300",
         scrolled
           ? "bg-black/30 backdrop-blur-lg shadow-lg border-b border-white/10"
           : "bg-transparent"
@@ -60,11 +54,11 @@ const Navbar = () => {
       <div className="max-w-[1500px] mx-auto px-6 py-4 flex justify-between items-center">
         {/* Logo */}
         <Link
-          className="flex gap-2 text-white items-center uppercase font-bold text-secondary   z-50"
+          className="flex gap-2 text-white items-center uppercase font-bold text-secondary z-50"
           href="/"
         >
           <img
-            className="h-[50px] w-[50px] "
+            className="h-[50px] w-[50px]"
             src="/lab-link-logo.png"
             alt="Lab Link Logo"
           />
@@ -72,27 +66,35 @@ const Navbar = () => {
         </Link>
 
         {/* Desktop Menu */}
-        <ul className="hidden md:flex items-center gap-8 text-white font-medium">
-          {navItems.map(({ name, link }) => (
-            <li key={name} className="relative flex items-center group">
-              <Link
-                href={link}
-                className={clsx(
-                  "hover:text-primary transition-colors duration-300",
-                  activePage === link && "text-primary"
-                )}
-              >
-                {name}
-              </Link>
-              <span
-                className={clsx(
-                  "absolute left-0 bottom-0 h-[2px] bg-primary transition-all duration-300 group-hover:w-full",
-                  activePage === link ? "w-full" : "w-0"
-                )}
-              ></span>
-            </li>
-          ))}
-        </ul>
+        <div className="hidden md:flex gap-4">
+          <ul className="hidden md:flex items-center gap-8 text-white font-medium">
+            {navItems.map(({ name, link }) => (
+              <li key={name} className="relative flex items-center group">
+                <Link
+                  href={link}
+                  className={clsx(
+                    "hover:text-primary transition-colors duration-300",
+                    pathname === link && "text-primary"
+                  )}
+                >
+                  {name}
+                </Link>
+                <span
+                  className={clsx(
+                    "absolute left-0 bottom-0 h-[2px] bg-primary transition-all duration-300 group-hover:w-full",
+                    pathname === link ? "w-full" : "w-0"
+                  )}
+                ></span>
+              </li>
+            ))}
+          </ul>
+
+          <Button asChild>
+            <Link href="/sign-in" className="text-white">
+              Book a Test
+            </Link>
+          </Button>
+        </div>
 
         {/* Mobile Menu Button */}
         <button
@@ -126,7 +128,7 @@ const Navbar = () => {
       {/* Enhanced Mobile Menu with Slide-in Animation */}
       <div
         className={clsx(
-          "fixed z-[100] md:hidden inset-0 bg-black/80 backdrop-blur-lg  transition-all duration-500 ease-in-out",
+          "fixed z-[100] md:hidden inset-0 bg-black/80 backdrop-blur-lg transition-all duration-500 ease-in-out",
           isOpen ? "opacity-100 visible" : "opacity-0 invisible"
         )}
         onClick={closeMenu}
@@ -155,7 +157,7 @@ const Navbar = () => {
                       href={link}
                       className={clsx(
                         "flex items-center justify-between p-4 rounded-lg transition-all duration-300",
-                        activePage === link
+                        pathname === link
                           ? "bg-primary/10 text-primary font-medium"
                           : "text-white hover:bg-white/5"
                       )}
@@ -165,9 +167,7 @@ const Navbar = () => {
                       <ChevronRight
                         size={18}
                         className={
-                          activePage === link
-                            ? "text-primary"
-                            : "text-gray-400"
+                          pathname === link ? "text-primary" : "text-gray-400"
                         }
                       />
                     </Link>

@@ -57,7 +57,7 @@ const LabLinkSolutions = () => {
         {/* Left Column */}
         <div className="w-full lg:w-1/2">
           <div className="mb-6 sm:mb-8">
-            <span className="text-primary font-semibold mb-2 block text-sm sm:text-base">
+            <span className="text-[#001C3D] font-semibold mb-2 block text-sm sm:text-base">
               YOUR HEALTH, OUR PRIORITY
             </span>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight">
@@ -187,7 +187,7 @@ const LabLinkSolutions = () => {
             />
             <div className="absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-to-t from-blue-900/20 to-transparent" />
           </div>
-          <div className="bg-gradient-to-br from-blue-900 to-blue-800 text-white rounded-xl sm:rounded-2xl p-6 sm:p-8 shadow-lg sm:shadow-xl">
+          <div className="bg-gradient-to-br from-[#001C3D] to-blue-900 text-white rounded-xl sm:rounded-2xl p-6 sm:p-8 shadow-lg sm:shadow-xl">
             <h3 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6">
               Ready to Take Charge of Your Health?
             </h3>

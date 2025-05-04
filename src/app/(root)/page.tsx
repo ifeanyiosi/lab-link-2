@@ -104,7 +104,7 @@ const LabLinkLandingPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Commercial */}
             <div className="bg-[#032540] p-6 rounded-lg shadow-md text-left">
-              <CalendarCheck size={40} className="text-[#ffa800] mb-4" />
+              <CalendarCheck size={40} className="text-primary mb-4" />
               <h3 className="text-2xl font-bold text-white mb-2">
                 Easy Booking
               </h3>
@@ -113,7 +113,7 @@ const LabLinkLandingPage: React.FC = () => {
               </p>
               <Link
                 href="/services"
-                className="inline-flex items-center text-[#ffa800] font-medium hover:underline"
+                className="inline-flex items-center text-primary font-medium hover:underline"
               >
                 LEARN MORE <ArrowRight size={18} className="ml-2" />
               </Link>
@@ -121,7 +121,7 @@ const LabLinkLandingPage: React.FC = () => {
 
             {/* Residential */}
             <div className="bg-[#032540] p-6 rounded-lg shadow-md text-left">
-              <FileText size={40} className="text-[#ffa800] mb-4" />
+              <FileText size={40} className="text-primary mb-4" />
               <h3 className="text-2xl font-bold text-white mb-2">
                 Quick Results
               </h3>
@@ -130,7 +130,7 @@ const LabLinkLandingPage: React.FC = () => {
               </p>
               <Link
                 href="/services"
-                className="inline-flex items-center text-[#ffa800] font-medium hover:underline"
+                className="inline-flex items-center text-primary font-medium hover:underline"
               >
                 LEARN MORE <ArrowRight size={18} className="ml-2" />
               </Link>
@@ -138,7 +138,7 @@ const LabLinkLandingPage: React.FC = () => {
 
             {/* Interiors */}
             <div className="bg-[#032540] p-6 rounded-lg shadow-md text-left">
-              <ShieldCheck size={40} className="text-[#ffa800] mb-4" />
+              <ShieldCheck size={40} className="text-primary mb-4" />
               <h3 className="text-2xl font-bold text-white mb-2">
                 Privacy First
               </h3>
@@ -147,7 +147,7 @@ const LabLinkLandingPage: React.FC = () => {
               </p>
               <Link
                 href="/services"
-                className="inline-flex items-center text-[#ffa800] font-medium hover:underline"
+                className="inline-flex items-center text-primary font-medium hover:underline"
               >
                 LEARN MORE <ArrowRight size={18} className="ml-2" />
               </Link>
@@ -157,7 +157,7 @@ const LabLinkLandingPage: React.FC = () => {
           {/* CTA Section */}
           <div className="mt-16 text-white py-6 rounded-lg inline-block text-lg font-medium text-center">
             Book lab tests from the comfort of your home.{" "}
-            <span className="font-bold text-[#ffa800]">
+            <span className="font-bold text-primary">
               Schedule Your Test Today!
             </span>
           </div>
@@ -176,10 +176,10 @@ const LabLinkLandingPage: React.FC = () => {
                 {/* Content Section */}
                 <div className="lg:w-1/2 mb-8 lg:mb-0">
                   <div className="inline-flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-blue-100 transform hover:scale-105 transition-transform duration-200">
-                    <Mail className="w-8 h-8 text-blue-600" />
+                    <Mail className="w-8 h-8 text-[#001C3D] " />
                   </div>
 
-                  <h2 className="mb-4 text-2xl md:text-3xl text-primary lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text">
+                  <h2 className="mb-4 text-2xl md:text-3xl text-[#001C3D] lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text">
                     Join Our Health Insights Mailing List
                   </h2>
 

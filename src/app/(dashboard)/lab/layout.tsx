@@ -28,16 +28,20 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const router = useRouter();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const { user, loading, logout } = useAuth();
-  const role = user?.role || "";
+  const [hydrated, setHydrated] = useState(false);
 
-  // If the user is not logged in, redirect to the sign-in page.
+  // Avoid hydration mismatch by rendering only after mount
   useEffect(() => {
-    if (!loading && !user) {
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (hydrated && !loading && !user) {
       router.replace("/sign-in");
     }
-  }, [user, loading, router]);
+  }, [hydrated, user, loading, router]);
 
-  if (loading) {
+  if (!hydrated || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
@@ -45,11 +49,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     );
   }
 
-  if (!user) {
-    return null; // Return null while redirecting
-  }
+  if (!user) return null;
 
-  // Define Lab-specific menu items.
+  const role = user.role || "";
+
   const labMenuItems: MenuSection[] = [
     {
       items: [
@@ -71,30 +74,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           href: "/lab/test-orders",
           visible: ["lab"],
         },
-        // {
-        //   icon: "/result.png",
-        //   label: "Results Processing",
-        //   href: "/lab/results-processing",
-        //   visible: ["lab"],
-        // },
-        // {
-        //   icon: "/inventory.png",
-        //   label: "Inventory Management",
-        //   href: "/lab/inventory-management",
-        //   visible: ["lab"],
-        // },
-        // {
-        //   icon: "/messages.png",
-        //   label: "Messages",
-        //   href: "/lab/messages",
-        //   visible: ["lab"],
-        // },
-        // {
-        //   icon: "/settings.png",
-        //   label: "Settings",
-        //   href: "/settings",
-        //   visible: ["lab"],
-        // },
       ],
     },
     {
@@ -110,7 +89,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     },
   ];
 
-  // Use the lab-specific menu items if the user's role is lab.
   const menuItems = role === "lab" ? labMenuItems : [];
 
   return (
@@ -133,7 +111,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           />
           <span className="font-bold text-lg">Lablink</span>
         </Link>
-        <div className="w-10" /> {/* Spacer */}
+        <div className="w-10" />
       </div>
 
       {/* Sidebar */}
@@ -144,7 +122,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           lg:translate-x-0 w-64 lg:w-[16%] xl:w-[14%] shadow-lg lg:shadow-none
           flex flex-col`}
       >
-        {/* Desktop Logo */}
         <div className="hidden lg:flex items-center gap-2 p-4 border-b">
           <Image
             src="/icons/lab-link-logo.png"
@@ -156,7 +133,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <span className="font-bold text-lg">Lablink</span>
         </div>
 
-        {/* Menu */}
         <div className="flex-1 overflow-y-auto pt-16 lg:pt-0">
           {menuItems.map((section, idx) => (
             <div key={section.title || idx} className="flex flex-col py-4">
@@ -189,7 +165,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           ))}
         </div>
 
-        {/* Logout */}
         <div className="p-4 border-t mt-auto">
           <button
             onClick={logout}

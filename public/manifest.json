@@ -1,0 +1,21 @@
+{
+  "name": "Lab Link",
+  "short_name": "LabLink",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0F172A",
+  "description": "Seamlessly book and manage lab tests with Lab Link. Fast, secure, and hassle-free medical diagnostics booking.",
+  "icons": [
+    {
+      "src": "/lab-link-logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/lab-link-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
