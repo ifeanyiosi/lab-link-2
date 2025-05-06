@@ -21,6 +21,7 @@ import { statesAndTowns } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import PageHeader from "@/components/PageHeader";
 
 export interface LabService {
   id: string;
@@ -246,7 +247,7 @@ export default function LabListPage() {
         pauseOnHover
       />
 
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Find a Lab</h1>
+      <PageHeader title="Find a Lab" />
 
       {/* Search Section */}
       <div className="bg-white flex flex-col rounded-lg shadow-lg p-6 mb-8">
