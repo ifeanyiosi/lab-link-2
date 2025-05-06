@@ -167,7 +167,7 @@ export const statesAndTowns: { [key: string]: string[] } = {
     "Ido-Ekiti",
   ],
   Enugu: [
-    "Enugu",
+    "Enugu North",
     "Nsukka",
     "Awgu",
     "Agbani",
