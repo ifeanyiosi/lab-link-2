@@ -157,11 +157,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </button>
         <Link href="/" className="flex items-center gap-2">
           <Image
-            src="/icons/lab-link-logo.png"
+            src="/lab-link-logo.png"
             alt="logo"
             width={24}
             height={24}
-            className="w-6 h-6"
+            className="w-[30px] h-[30px] "
           />
           <span className="font-bold text-lg">Lablink</span>
         </Link>

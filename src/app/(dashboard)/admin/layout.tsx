@@ -124,7 +124,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </button>
         <Link href="/" className="flex items-center gap-2">
           <Image
-            src="/icons/lab-link-logo.png"
+            src="/lab-link-logo.png"
             alt="logo"
             width={24}
             height={24}
@@ -145,7 +145,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       >
         <div className="hidden lg:flex items-center gap-2 p-4 border-b">
           <Image
-            src="/icons/lab-link-logo.png"
+            src="/lab-link-logo.png"
             alt="logo"
             width={24}
             height={24}
