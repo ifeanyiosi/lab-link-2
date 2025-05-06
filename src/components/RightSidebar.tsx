@@ -15,6 +15,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/firebase/firebaseConfig";
 import { formatDistanceToNow, isValid } from "date-fns";
+import { useRouter } from "next/navigation";
 
 interface Appointment {
   id: string;
@@ -41,6 +42,7 @@ interface Result {
 
 const RightSidebar = () => {
   const { user } = useAuth();
+  const router = useRouter();
   const [notifications, setNotifications] = useState<any[]>([]);
   const [healthReminders, setHealthReminders] = useState<string[]>([]);
   const [stats, setStats] = useState({
@@ -59,12 +61,25 @@ const RightSidebar = () => {
     }
   };
 
+  const isWithin24Hours = (date: Date) => {
+    const now = new Date();
+    const diffInMs = now.getTime() - date.getTime();
+    return diffInMs <= 24 * 60 * 60 * 1000;
+  };
+
+  const handleNotificationClick = (type: string, id?: string) => {
+    if (type === "appointment") {
+      router.push("/patient/appointment/appointments");
+    } else if (type === "result") {
+      router.push("/patient/test-results");
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       if (!user?.uid) return;
 
       try {
-        // Fetch appointments
         const appointmentsRef = collection(db, "appointments");
         const appointmentsQuery = query(
           appointmentsRef,
@@ -83,7 +98,6 @@ const RightSidebar = () => {
             } as Appointment)
         );
 
-        // Fetch latest test result
         const resultsRef = collection(db, "users", user.uid, "results");
         const resultsQuery = query(
           resultsRef,
@@ -95,16 +109,15 @@ const RightSidebar = () => {
           | Result
           | undefined;
 
-        // Build notifications
         const newNotifications = [];
         const now = new Date();
 
-        // Find first upcoming appointment
         const firstUpcomingAppointment = userAppointments.find((apt) => {
           const appointmentDate = convertTimestamp(apt.date);
           return (
             ["pending", "confirmed"].includes(apt.status) &&
-            appointmentDate > now
+            appointmentDate > now &&
+            isWithin24Hours(appointmentDate)
           );
         });
 
@@ -117,8 +130,7 @@ const RightSidebar = () => {
               type: "appointment",
               message: `Upcoming ${firstUpcomingAppointment.tests
                 .map((t) => t.name)
-                .join(", ")} 
-                       at ${firstUpcomingAppointment.labName}`,
+                .join(", ")} at ${firstUpcomingAppointment.labName}`,
               time: formatDistanceToNow(appointmentDate, { addSuffix: true }),
               icon: Calendar,
               status:
@@ -131,11 +143,12 @@ const RightSidebar = () => {
 
         if (firstResult?.uploadedAt) {
           const uploadedAtDate = convertTimestamp(firstResult.uploadedAt);
-          if (isValid(uploadedAtDate)) {
+          if (isValid(uploadedAtDate) && isWithin24Hours(uploadedAtDate)) {
             newNotifications.push({
               type: "result",
-              message: `New ${firstResult.tests.map((t) => t.name).join(", ")} 
-                       results available from ${firstResult.labName}`,
+              message: `New ${firstResult.tests
+                .map((t) => t.name)
+                .join(", ")} results available from ${firstResult.labName}`,
               time: formatDistanceToNow(uploadedAtDate, { addSuffix: true }),
               icon: FileText,
               status: "success",
@@ -145,7 +158,6 @@ const RightSidebar = () => {
 
         setNotifications(newNotifications);
 
-        // Build health reminders
         const reminders = [];
         if (firstUpcomingAppointment?.status === "pending") {
           reminders.push("Fasting required for upcoming blood work");
@@ -161,7 +173,6 @@ const RightSidebar = () => {
 
         setHealthReminders(reminders);
 
-        // Calculate stats
         const completedAppointments = userAppointments.filter(
           (apt) => apt.status === "completed"
         );
@@ -220,7 +231,13 @@ const RightSidebar = () => {
                 return (
                   <div
                     key={index}
-                    className="flex gap-3 items-start border-b last:border-0 pb-3 last:pb-0"
+                    className="flex gap-3 cursor-pointer items-start border-b last:border-0 pb-3 last:pb-0"
+                    onClick={() =>
+                      handleNotificationClick(
+                        notification.type,
+                        notification.id
+                      )
+                    }
                   >
                     <div
                       className={`p-2 rounded-lg ${
@@ -235,9 +252,6 @@ const RightSidebar = () => {
                       <p className="text-sm text-gray-600">
                         {notification.message}
                       </p>
-                      <span className="text-xs text-gray-500 mt-1">
-                        {notification.time}
-                      </span>
                     </div>
                   </div>
                 );

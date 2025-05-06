@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ToastContainer, toast, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import PageHeader from "@/components/PageHeader";
 
 export interface Appointment {
   id?: string;
@@ -323,7 +324,7 @@ export default function PatientDashboard() {
       {/* Main Content */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Appointments</h1>
+          <PageHeader title="My Appointments" />
           <p className="text-gray-600 mt-2">
             Track and manage your lab appointments
           </p>
@@ -451,25 +452,36 @@ export default function PatientDashboard() {
                         </div>
 
                         <div className="mt-6 flex gap-3">
-                          <Button
-                            variant="outline"
-                            className="flex-1"
-                            onClick={() => {
-                              setSelectedAppointment(appointment);
-                              setNewDate(appointment.date);
-                              setNewTime(appointment.time);
-                              fetchLabHours(appointment.labId);
-                            }}
-                            disabled={!!processingId}
-                          >
-                            Reschedule
-                          </Button>
+                          {/* Only show reschedule button for pending or confirmed appointments */}
                           {["pending", "confirmed"].includes(
                             appointment.status
                           ) && (
                             <Button
                               variant="outline"
-                              className="flex-1 text-red-600 hover:text-red-700"
+                              className="flex-1"
+                              onClick={() => {
+                                setSelectedAppointment(appointment);
+                                setNewDate(appointment.date);
+                                setNewTime(appointment.time);
+                                fetchLabHours(appointment.labId);
+                              }}
+                              disabled={!!processingId}
+                            >
+                              Reschedule
+                            </Button>
+                          )}
+                          {["pending", "confirmed"].includes(
+                            appointment.status
+                          ) && (
+                            <Button
+                              variant="outline"
+                              className={`flex-1 text-red-600 hover:text-red-700 ${
+                                ["pending", "confirmed"].includes(
+                                  appointment.status
+                                )
+                                  ? ""
+                                  : "hidden"
+                              }`}
                               onClick={() => handleCancel(appointment.id!)}
                               disabled={processingId === appointment.id}
                             >

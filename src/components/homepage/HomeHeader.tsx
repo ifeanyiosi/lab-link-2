@@ -174,6 +174,11 @@ const Navbar = () => {
                   </li>
                 ))}
               </ul>
+              <Button className="w-full mt-10" size={"lg"} asChild>
+                <Link href="/sign-in" className="text-white">
+                  Book a Test
+                </Link>
+              </Button>
             </div>
           </div>
         </div>

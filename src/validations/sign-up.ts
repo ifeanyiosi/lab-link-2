@@ -49,8 +49,8 @@ export const labSignupSchema = z
     phone: z
       .string()
       .regex(
-        /^080\d{8}$/,
-        "Phone number must start with 080 and be 11 digits long"
+        /^(?:070|080|081|090|091)\d{8}$/,
+        "Phone number must be a valid Nigerian number (e.g., 080XXXXXXXX, 070XXXXXXXX, etc.)"
       ),
     confirmPassword: z
       .string()

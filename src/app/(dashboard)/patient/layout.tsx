@@ -171,71 +171,77 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       {/* Sidebar */}
       <aside
         className={`fixed lg:sticky top-0 left-0 h-full bg-white z-40 
-          transition-transform duration-300 ease-in-out
-          ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
-          lg:translate-x-0 w-64 lg:w-[16%] xl:w-[14%] shadow-lg lg:shadow-none
-          flex flex-col`}
+    transition-transform duration-300 ease-in-out
+    ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
+    lg:translate-x-0 w-64 lg:w-[16%] xl:w-[14%] shadow-lg lg:shadow-none
+    flex flex-col`}
       >
+        {/* Logo/Header */}
         <div className="hidden lg:flex items-center gap-2 p-4 border-b">
           <Image
-            src="/icons/lab-link-logo.png"
+            src="/lab-link-logo.png"
             alt="logo"
-            width={24}
-            height={24}
-            className="w-6 h-6"
+            width={50}
+            height={50}
+            className="w-[50px] h-[50px]"
           />
           <span className="font-bold text-lg">Lablink</span>
         </div>
 
-        <div className="flex-1 overflow-y-auto pt-16 lg:pt-0">
-          {menuItems.map((section, idx) => (
-            <div
-              key={section.title || `section-${idx}`}
-              className="flex flex-col py-4"
-            >
-              {section.title && (
-                <span className="px-4 text-gray-400 font-light text-sm my-2">
-                  {section.title}
-                </span>
-              )}
-              {section.items.map(
-                (item) =>
-                  item.visible.includes(role) && (
-                    <Link
-                      key={`${item.label}-${item.href}`}
-                      href={item.href}
-                      className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-primary transition-colors"
-                      onClick={() => setSidebarOpen(false)}
-                    >
-                      <Image
-                        src={item.icon}
-                        alt={item.label}
-                        width={24}
-                        height={24}
-                        className="w-6 h-6"
-                      />
-                      <span className="text-sm">{item.label}</span>
-                    </Link>
-                  )
-              )}
-            </div>
-          ))}
-        </div>
+        {/* Sidebar content: spaced with justify-between */}
+        <div className="flex-1  flex flex-col justify-between overflow-y-auto pt-16 lg:pt-0 ">
+          {/* Menu items */}
+          <div>
+            {menuItems.map((section, idx) => (
+              <div
+                key={section.title || `section-${idx}`}
+                className="flex flex-col py-4"
+              >
+                {section.title && (
+                  <span className="px-4 text-gray-400 font-light text-sm my-2">
+                    {section.title}
+                  </span>
+                )}
+                {section.items.map(
+                  (item) =>
+                    item.visible.includes(role) && (
+                      <Link
+                        key={`${item.label}-${item.href}`}
+                        href={item.href}
+                        className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-primary transition-colors"
+                        onClick={() => setSidebarOpen(false)}
+                      >
+                        <Image
+                          src={item.icon}
+                          alt={item.label}
+                          width={24}
+                          height={24}
+                          className="w-6 h-6"
+                        />
+                        <span className="text-sm">{item.label}</span>
+                      </Link>
+                    )
+                )}
+              </div>
+            ))}
+          </div>
 
-        <div className="p-4 border-t mt-auto">
-          <button
-            onClick={logout}
-            className="flex items-center gap-2 w-full px-4 py-2 text-gray-600 hover:bg-primary hover:text-white rounded-lg transition-colors"
-          >
-            <Image
-              src="/logout.png"
-              alt="logout"
-              width={20}
-              height={20}
-              className="w-5 h-5"
-            />
-            <span className="text-sm">Logout</span>
-          </button>
+          {/* Logout button */}
+          <div className="p-4 border-t">
+            <button
+              onClick={logout}
+              className="flex items-center gap-2 w-full px-4 py-2 text-gray-600 hover:bg-primary hover:text-white rounded-lg transition-colors"
+            >
+              <Image
+                src="/logout.png"
+                alt="logout"
+                width={20}
+                height={20}
+                className="w-5 h-5"
+              />
+              <span className="text-sm">Logout</span>
+            </button>
+          </div>
         </div>
       </aside>
 

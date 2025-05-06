@@ -5,6 +5,14 @@ import { collection, getDocs, query, where, addDoc } from "firebase/firestore";
 import { db } from "@/firebase/firebaseConfig";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import {
+  ArrowLeft,
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  CheckCircle,
+} from "lucide-react";
 
 interface Lab {
   id: string;
@@ -112,81 +120,148 @@ const AvailableLabs = () => {
     window.open(googleMapsUrl, "_blank");
   };
 
-  if (loading) return <p>Loading labs...</p>;
+  const handleGoBack = () => {
+    router.back();
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Available Labs</h1>
+    <div className="container mx-auto p-4 ">
+      <div className="flex items-center mb-6">
+        <Button variant="ghost" className="mr-2 p-2" onClick={handleGoBack}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <h1 className="text-3xl font-bold text-gray-800">Available Labs</h1>
+      </div>
+
       {paginatedLabs.length > 0 ? (
-        <ul className="space-y-4">
+        <div className="space-y-6">
           {paginatedLabs.map((lab) => (
-            <li
+            <div
               key={lab.id}
-              className="p-4 border rounded-lg shadow-md bg-white space-y-2"
+              className="p-6 border rounded-xl shadow-md bg-white hover:shadow-lg transition-shadow duration-300"
             >
-              <h3 className="text-xl font-semibold">{lab.labName}</h3>
-              <p className="text-sm text-gray-600">
-                <strong>Email:</strong> {lab.email}
-              </p>
-              <p className="text-sm text-gray-600">
-                <strong>Phone:</strong> {lab.phone}
-              </p>
-              <p className="text-sm text-gray-600">
-                <strong>Address:</strong> {lab.address}
-              </p>
-              <p className="text-sm text-gray-600">
-                <strong>Operating Hours:</strong>
-                {lab.operatingHours.openingTime} -
-                {lab.operatingHours.closingTime}
-              </p>
-              <p className="text-sm text-gray-600">
-                <strong>Services:</strong>
-                {lab.services.length > 0
-                  ? lab.services.join(", ")
-                  : "No services listed"}
-              </p>
-              <p className="text-sm text-gray-600">
-                <strong>Location:</strong> {lab.town}, {lab.state}
-              </p>
-              <div className="flex space-x-4 mt-4">
+              <h3 className="text-2xl font-semibold text-blue-600 mb-3">
+                {lab.labName}
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <div className="flex items-center text-gray-700">
+                    <Mail className="h-4 w-4 mr-2 text-gray-500" />
+                    <span>{lab.email}</span>
+                  </div>
+                  <div className="flex items-center text-gray-700">
+                    <Phone className="h-4 w-4 mr-2 text-gray-500" />
+                    <span>{lab.phone}</span>
+                  </div>
+                  <div className="flex items-start text-gray-700">
+                    <MapPin className="h-4 w-4 mr-2 mt-1 text-gray-500" />
+                    <span>
+                      {lab.address}
+                      <br />
+                      {lab.town}, {lab.state}
+                    </span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center text-gray-700">
+                    <Clock className="h-4 w-4 mr-2 text-gray-500" />
+                    <span>
+                      {lab.operatingHours.openingTime} -{" "}
+                      {lab.operatingHours.closingTime}
+                    </span>
+                  </div>
+                  <div className="flex items-start text-gray-700">
+                    <CheckCircle className="h-4 w-4 mr-2 mt-1 text-gray-500" />
+                    <div>
+                      <div className="font-medium">Services:</div>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {lab.services.length > 0 ? (
+                          lab.services.map((service, index) => (
+                            <span
+                              key={index}
+                              className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full"
+                            >
+                              {service}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-gray-500">
+                            No services listed
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-3 mt-4">
                 <Button
                   variant="default"
+                  className="bg-blue-600 hover:bg-blue-700"
                   onClick={() => handleMakeAppointment(lab.id, lab.labName)}
                 >
                   Make Appointment
                 </Button>
                 <Button
                   variant="outline"
+                  className="text-blue-600 border-blue-600 hover:bg-blue-50"
                   onClick={() => handleGetDirections(lab.address)}
                 >
                   Get Directions
                 </Button>
               </div>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       ) : (
-        <p>No labs available at the moment.</p>
+        <div className="bg-gray-50 p-8 rounded-lg text-center">
+          <p className="text-gray-600">No labs available at the moment.</p>
+        </div>
       )}
-      <div className="flex justify-between items-center mt-6">
-        <Button
-          variant="outline"
-          disabled={currentPage === 1}
-          onClick={handlePreviousPage}
-        >
-          Previous
-        </Button>
-        <span className="text-sm text-gray-600">
-          Page {currentPage} of {totalPages}
-        </span>
-        <Button
-          variant="outline"
-          disabled={currentPage === totalPages}
-          onClick={handleNextPage}
-        >
-          Next
-        </Button>
-      </div>
+
+      {totalPages > 1 && (
+        <div className="flex justify-between items-center mt-8 bg-white p-4 rounded-lg shadow">
+          <Button
+            variant="outline"
+            disabled={currentPage === 1}
+            onClick={handlePreviousPage}
+            className="border-gray-300"
+          >
+            Previous
+          </Button>
+          <div className="flex items-center gap-2">
+            {[...Array(totalPages)].map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentPage(index + 1)}
+                className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  currentPage === index + 1
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                {index + 1}
+              </button>
+            ))}
+          </div>
+          <Button
+            variant="outline"
+            disabled={currentPage === totalPages}
+            onClick={handleNextPage}
+            className="border-gray-300"
+          >
+            Next
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

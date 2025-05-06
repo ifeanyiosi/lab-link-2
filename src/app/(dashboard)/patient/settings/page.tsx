@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { auth, db } from "@/firebase/firebaseConfig";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import PageHeader from "@/components/PageHeader";
 
 const SettingsPage = () => {
   const [activeSection, setActiveSection] = useState("profile");
@@ -119,8 +120,7 @@ const SettingsPage = () => {
     switch (activeSection) {
       case "profile":
         return (
-          <div className="space-y-6">       
-
+          <div className="space-y-6">
             <div className="grid md:grid-cols-2 gap-4 w-full">
               <div>
                 <Label>First Name</Label>
@@ -250,7 +250,7 @@ const SettingsPage = () => {
 
   return (
     <div className="container mx-auto py-6">
-      <h1 className="text-3xl font-bold mb-6">Account Settings</h1>
+      <PageHeader title="Settings" />
 
       <div className="grid md:grid-cols-[250px_1fr] gap-8">
         {/* Sidebar Menu */}

@@ -71,7 +71,7 @@ const PatientDashboard: React.FC = () => {
       icon: Building2,
       title: "Find Lab",
       description: "Locate nearest lab",
-      href: "/list/labs",
+      href: "/patient/labs",
       color: "bg-purple-100 text-purple-600",
     },
   ];
