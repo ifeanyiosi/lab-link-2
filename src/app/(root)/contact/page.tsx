@@ -188,7 +188,7 @@ const Contact: React.FC = () => {
           </p>
           <div className="flex justify-center space-x-4">
             <Link
-              href="#contact-form"
+              href="/sign-in"
               className="px-8 py-4 bg-[#ffa800] text-[#031f35] font-bold rounded-md hover:bg-white transition-colors duration-300"
             >
               Book Now
